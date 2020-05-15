@@ -14,11 +14,14 @@ Vous pouvez ouvrir Mario_level1.tmx avec Tiled et le modifier si vous voulez.
 Les deux fichiers C# construisent un programme qui prend un fichier tmx et en construit un niveau qui réarrange les colonnes de tiles au hasard et génère ainsi un niveau aléatoire (sans doute pas très jouable!).
 
 Pour faire tourner le “mélangeur de colonnes” sur l’exemple:
-Pour construire et compiler, avec csc et mono:
+
+- Pour construire et compiler, avec csc et mono:
 csc -nologo -debug:full *.cs
-Pour exécuter avec mono:
+
+- Pour exécuter avec mono:
 mono MarioLevelRandomizer.exe Samples/Mario_level1.tmx Samples/random_level.tmx
-Comparez, en les ouvrant avec Tiled, les fichiers Mario_level1.tmx et random_level.tmx
+
+- Comparez, en les ouvrant avec Tiled, les fichiers Mario_level1.tmx et random_level.tmx
 
 Le format tmx décrit ici: https://doc.mapeditor.org/en/stable/reference/tmx-map-format/
 
