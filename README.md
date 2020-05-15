@@ -15,7 +15,7 @@ Les deux fichiers C# construisent un programme qui prend un fichier tmx et en co
 
 Pour faire tourner le “mélangeur de colonnes” sur l’exemple:
 
-- Pour construire et compiler, avec csc et mono:
+- Pour construire et compiler, avec csc:
 csc -nologo -debug:full *.cs
 
 - Pour exécuter avec mono:
