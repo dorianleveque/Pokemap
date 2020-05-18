@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
 
-namespace mariogenerator
+namespace pokemongenerator
 {
     public class TileColumn{
         public int Id {get;private set;}
