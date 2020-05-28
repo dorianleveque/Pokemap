@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--This is a comment-->
+<Root>
+  <Child1>data1</Child1>
+  <Child2>data2</Child2>
+  <Child3>data3</Child3>
+  <Child2>data4</Child2>
+  <Info5>info5</Info5>
+  <Info6>info6</Info6>
+  <Info7>info7</Info7>
+  <Info8>info8</Info8>
+</Root>
