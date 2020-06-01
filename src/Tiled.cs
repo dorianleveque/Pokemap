@@ -15,34 +15,44 @@ namespace tiled
       this.id = id;
       this.name = name;
     }
-  }
-
-  public class TiledColumn
-  {
-    public readonly List<Tile> column = new List<Tile>();
     public override string ToString()
     {
-      return String.Join(',', column);
+      return id.ToString();
     }
   }
+
+  public class TiledLine
+  {
+    private readonly List<Tile> line = new List<Tile>();
+    public void add(int id)
+    {
+      line.Add(new Tile(id, ""));
+    }
+    public override string ToString()
+    {
+      return String.Join(',', line);
+    }
+  }
+
   public class TiledMap
   {
     public int width { get; private set; }
     public int height { get; private set; }
     private string tilesetPath;
-    private List<TiledColumn> columns = new List<TiledColumn>();
+    public List<TiledLine> map = new List<TiledLine>();
 
     public TiledMap(int width, int height, string tilesetPath)
     {
       this.width = width;
       this.height = height;
       this.tilesetPath = tilesetPath;
+      initMap();
     }
 
     public void save()
     {
       XDocument xMap = new XDocument(
-        new XElement("map", 
+        new XElement("map",
           new XAttribute("version", "1.2"),
           new XAttribute("tiledversion", "1.3.4"),
           new XAttribute("orientation", "orthogonal"),
@@ -55,22 +65,44 @@ namespace tiled
           new XAttribute("backgroundcolor", "#00000000"),
           new XAttribute("nextlayerid", 5),
           new XAttribute("nextobjectid", 1),
-          new XElement("tileset", 
-            new XAttribute("firstgid", 1), 
+          new XElement("tileset",
+            new XAttribute("firstgid", 1),
             new XAttribute("source", this.tilesetPath)
           ),
-          new XElement("layer", 
+          new XElement("layer",
             new XAttribute("name", "ground"),
             new XAttribute("width", this.width),
             new XAttribute("height", this.height),
-            new XElement("data", 
+            new XElement("data",
               new XAttribute("encoding", "csv"),
-              "data"
+              this.ToString()
             )
           )
         )
       );
-      xMap.Save("./assets/test.tmx");
+      xMap.Save("./assets/pokemap-test.tmx");
+    }
+
+    public override string ToString()
+    {
+      map.ForEach(line => {
+        Console.WriteLine(line.ToString());
+      });
+      //Console.WriteLine(map.ConvertAll(line => line.ToString()).ToArray());
+      return String.Join(",\n", map.ConvertAll(line => line.ToString()).ToArray() );
+    }
+
+    private void initMap()
+    {
+      for (int h = 0; h < height; h++)
+      {
+        TiledLine line = new TiledLine();
+        for (int w = 0; w < width; w++)
+        {
+          line.add(0);
+        }
+        map.Add(line);
+      }
     }
   }
 }
