@@ -3,7 +3,6 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
-using tiled;
 
 namespace pokemongenerator
 {
@@ -25,7 +24,7 @@ namespace pokemongenerator
       var plr = new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]));
       try
       {
-        plr.generate();
+        plr.Generate();
       }
       catch (Exception e)
       {
@@ -34,11 +33,12 @@ namespace pokemongenerator
       }
     }
 
-    private void generate()
+    private void Generate()
     {
       // TODO
-      TiledMap map = new TiledMap(this.width, this.height, "Terrain.tsx");
-      map.save();
+      MapGenerator g = new MapGenerator(width, height);
+      g.AddStep(new TerrainGenerator(44));
+      g.Generate();
     }
 
     private void ShuffleLayers(String sourceFile, String targetFile)

@@ -8,12 +8,10 @@ namespace tiled
 {
   public class Tile
   {
-    public int id { get; private set; }
-    public string name { get; private set; }
-    public Tile(int id, string name)
+    public int id;
+    public Tile(int id)
     {
       this.id = id;
-      this.name = name;
     }
     public override string ToString()
     {
@@ -23,14 +21,14 @@ namespace tiled
 
   public class TiledLine
   {
-    private readonly List<Tile> line = new List<Tile>();
+    public List<Tile> tiles = new List<Tile>();
     public void add(int id)
     {
-      line.Add(new Tile(id, ""));
+      tiles.Add(new Tile(id));
     }
     public override string ToString()
     {
-      return String.Join(',', line);
+      return String.Join(',', tiles);
     }
   }
 
@@ -39,7 +37,7 @@ namespace tiled
     public int width { get; private set; }
     public int height { get; private set; }
     private string tilesetPath;
-    public List<TiledLine> map = new List<TiledLine>();
+    public List<TiledLine> lines = new List<TiledLine>();
 
     public TiledMap(int width, int height, string tilesetPath)
     {
@@ -80,16 +78,12 @@ namespace tiled
           )
         )
       );
-      xMap.Save("./assets/pokemap-test.tmx");
+      xMap.Save("./assets/pokemap.tmx");
     }
 
     public override string ToString()
     {
-      map.ForEach(line => {
-        Console.WriteLine(line.ToString());
-      });
-      //Console.WriteLine(map.ConvertAll(line => line.ToString()).ToArray());
-      return String.Join(",\n", map.ConvertAll(line => line.ToString()).ToArray() );
+      return String.Join(",\n", lines.ConvertAll(line => line.ToString()).ToArray() );
     }
 
     private void initMap()
@@ -101,7 +95,7 @@ namespace tiled
         {
           line.add(0);
         }
-        map.Add(line);
+        lines.Add(line);
       }
     }
   }
