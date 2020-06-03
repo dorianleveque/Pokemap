@@ -3,6 +3,7 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
+using System.Text;
 
 namespace pokemongenerator
 {
@@ -10,21 +11,25 @@ namespace pokemongenerator
   {
     public int width { get; private set; }
     public int height { get; private set; }
+    public int seed { get; private set; }
 
-    public PokemonLevelRandomizer(int width, int height)
+    public PokemonLevelRandomizer(int width, int height, string seed = "1234")
     {
       this.width = width;
       this.height = height;
+      this.seed = seed.Sum(c => Convert.ToInt32(c));
     }
 
     static void Main(string[] args)
     {
-      /*Console.WriteLine("fichier source: " + args[0]);
-      Console.WriteLine("fichier cible: " + args[1]);*/
-      var plr = new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]));
       try
       {
-        plr.Generate();
+        switch (args.Length)
+        {
+          case 2: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]))).Generate(); break;
+          case 3: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]), args[2])).Generate(); break;
+          default: Console.WriteLine("Usage: <width> <height> <?seed>"); break;
+        }
       }
       catch (Exception e)
       {
@@ -37,22 +42,8 @@ namespace pokemongenerator
     {
       // TODO
       MapGenerator g = new MapGenerator(width, height);
-      g.AddStep(new TerrainGenerator(44));
+      g.AddStep(new TerrainGenerator(seed));
       g.Generate();
-    }
-
-    private void ShuffleLayers(String sourceFile, String targetFile)
-    {
-      var xDocument = XDocument.Load(sourceFile);
-      var xMap = xDocument.Element("map");
-      width = (int)xMap.Attribute("width");
-      height = (int)xMap.Attribute("height");
-      foreach (var e in xMap.Elements().Where(x => x.Name == "layer"))
-      {
-        var tl = new TileLayer(e, width, height);
-        tl.ShuffleColumns();
-      }
-      xDocument.Save(targetFile);
     }
   }
 }
