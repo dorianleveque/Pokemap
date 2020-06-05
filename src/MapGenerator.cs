@@ -91,19 +91,19 @@ namespace pokemongenerator
       TilesBeach.Add(TilePosition.CornerTopRight, 215);
       TilesBeach.Add(TilePosition.CornerBottomLeft, 195);
       TilesBeach.Add(TilePosition.CornerBottomRight, 194);
-      TilesGround.Add(TilePosition.TopLeft, 75);
-      TilesGround.Add(TilePosition.Top, 55);
-      TilesGround.Add(TilePosition.TopRight, 76);
-      TilesGround.Add(TilePosition.Left, 35);
+      TilesGround.Add(TilePosition.TopLeft, 12);
+      TilesGround.Add(TilePosition.Top, 13);
+      TilesGround.Add(TilePosition.TopRight, 14);
+      TilesGround.Add(TilePosition.Left, 33);
       TilesGround.Add(TilePosition.Center, 34);
-      TilesGround.Add(TilePosition.Right, 33);
-      TilesGround.Add(TilePosition.BottomLeft, 96);
-      TilesGround.Add(TilePosition.Bottom, 13);
-      TilesGround.Add(TilePosition.BottomRight, 97);
-      TilesGround.Add(TilePosition.CornerTopLeft, 56);
-      TilesGround.Add(TilePosition.CornerTopRight, 54);
-      TilesGround.Add(TilePosition.CornerBottomLeft, 14);
-      TilesGround.Add(TilePosition.CornerBottomRight, 12);
+      TilesGround.Add(TilePosition.Right, 35);
+      TilesGround.Add(TilePosition.BottomLeft, 54);
+      TilesGround.Add(TilePosition.Bottom, 55);
+      TilesGround.Add(TilePosition.BottomRight, 56);
+      TilesGround.Add(TilePosition.CornerTopLeft, 97);
+      TilesGround.Add(TilePosition.CornerTopRight, 96);
+      TilesGround.Add(TilePosition.CornerBottomLeft, 76);
+      TilesGround.Add(TilePosition.CornerBottomRight, 75);
     }
     public override void run()
     {
@@ -115,12 +115,13 @@ namespace pokemongenerator
           float x = (float)line.tiles.IndexOf(tile);
           switch (GetLayer(x, y))
           {
-            case Layer.DeepOcean: tile.id = GetCorrectLayerTile(x, y, Layer.DeepOcean, Layer.Ocean, TilesDeepOcean); break;
-            case Layer.Ocean: tile.id = GetCorrectLayerTile(x, y, Layer.Ocean, Layer.Beach, TilesOcean); break;
-            case Layer.Beach: tile.id = GetCorrectLayerTile(x, y, Layer.Beach, Layer.Ground0, TilesBeach); break;
-            case Layer.Ground0: tile.id = GetCorrectLayerTile(x, y, Layer.Ground0, Layer.Ground1, TilesGround); break;
-            case Layer.Ground1: tile.id = GetCorrectLayerTile(x, y, Layer.Ground1, Layer.Ground2, TilesGround); break;
-            case Layer.Ground2: tile.id = GetCorrectLayerTile(x, y, Layer.Ground2, Layer.Ground3, TilesGround); break;
+            case Layer.DeepOcean: tile.id = GetCorrectLayerTile(x, y, Layer.DeepOcean, TilesDeepOcean); break;
+            case Layer.Ocean: tile.id = GetCorrectLayerTile(x, y, Layer.Ocean, TilesOcean); break;
+            case Layer.Beach: tile.id = GetCorrectLayerTile(x, y, Layer.Beach, TilesBeach); break;
+            case Layer.Ground0: tile.id = GetCorrectLayerTile(x, y, Layer.Ground0, TilesGround); break;
+            case Layer.Ground1: tile.id = GetCorrectLayerTile(x, y, Layer.Ground1, TilesGround); break;
+            case Layer.Ground2: tile.id = GetCorrectLayerTile(x, y, Layer.Ground2, TilesGround); break;
+            case Layer.Ground3: tile.id = GetCorrectLayerTile(x, y, Layer.Ground3, TilesGround); break;
           }
         });
       });
@@ -136,9 +137,9 @@ namespace pokemongenerator
         case float n when (n < -0.2f): return Layer.DeepOcean;
         case float n when (n < -0.1f): return Layer.Ocean;
         case float n when (n < 0.0f): return Layer.Beach;
-        case float n when (n < 0.05f): return Layer.Ground0;
-        case float n when (n < 0.6f): return Layer.Ground1;
-        case float n when (n < 0.7f): return Layer.Ground2;
+        case float n when (n < 0.02f): return Layer.Ground0;
+        case float n when (n < 0.55f): return Layer.Ground1;
+        case float n when (n < 0.8f): return Layer.Ground2;
         default: return Layer.Ground3;
       }
     }
@@ -146,7 +147,7 @@ namespace pokemongenerator
     /**
     * Get the correct Layer Tile for the connection between each layer type
     */
-    private int GetCorrectLayerTile(float x, float y, Layer mainLayer, Layer neighborLayer, Dictionary<TilePosition, int> tilesID)
+    private int GetCorrectLayerTile(float x, float y, Layer mainLayer, Dictionary<TilePosition, int> tilesID)
     {
       Layer cornerTopLeft = GetLayer(x - 1, y - 1);
       Layer cornerTopRight = GetLayer(x + 1, y - 1);
@@ -157,20 +158,35 @@ namespace pokemongenerator
       Layer bottomTile = GetLayer(x, y + 1);
       Layer leftTile = GetLayer(x - 1, y);
 
-      if (topTile == neighborLayer && leftTile == neighborLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopLeft];
-      else if (topTile == neighborLayer && rightTile == neighborLayer && leftTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopRight];
-      else if (bottomTile == neighborLayer && leftTile == neighborLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomLeft];
-      else if (bottomTile == neighborLayer && rightTile == neighborLayer && leftTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomRight];
+      if (mainLayer < Layer.Ground0 && topTile > mainLayer && leftTile > mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopLeft];
+      else if (mainLayer < Layer.Ground0 && topTile > mainLayer && rightTile > mainLayer && leftTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopRight];
+      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && leftTile > mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomLeft];
+      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && rightTile > mainLayer && leftTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomRight];
+      
+      else if (mainLayer > Layer.Ground0 && topTile < mainLayer && leftTile < mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopLeft];
+      else if (mainLayer > Layer.Ground0 && topTile < mainLayer && rightTile < mainLayer && leftTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopRight];
+      else if (mainLayer > Layer.Ground0 && bottomTile < mainLayer && leftTile < mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomLeft];
+      else if (mainLayer > Layer.Ground0 && bottomTile < mainLayer && rightTile < mainLayer && leftTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomRight];
 
-      else if (topTile == neighborLayer && rightTile == mainLayer && bottomTile == mainLayer && leftTile == mainLayer) return tilesID[TilePosition.Top];
-      else if (rightTile == neighborLayer && topTile == mainLayer && bottomTile == mainLayer && leftTile == mainLayer) return tilesID[TilePosition.Right];
-      else if (bottomTile == neighborLayer && topTile == mainLayer && rightTile == mainLayer && leftTile == mainLayer) return tilesID[TilePosition.Bottom];
-      else if (leftTile == neighborLayer && topTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Left];
+      else if (mainLayer < Layer.Ground0 && topTile > mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Top];
+      else if (mainLayer < Layer.Ground0 && rightTile > mainLayer && leftTile == mainLayer && topTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Right];
+      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && leftTile == mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.Bottom];
+      else if (mainLayer < Layer.Ground0 && leftTile > mainLayer && topTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Left];
 
-      else if (cornerTopLeft == neighborLayer) return tilesID[TilePosition.CornerTopLeft];
-      else if (cornerTopRight == neighborLayer) return tilesID[TilePosition.CornerTopRight];
-      else if (cornerBottomLeft == neighborLayer) return tilesID[TilePosition.CornerBottomLeft];
-      else if (cornerBottomRight == neighborLayer) return tilesID[TilePosition.CornerBottomRight];
+      else if (mainLayer > Layer.Ground0 && topTile < mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Top];
+      else if (mainLayer > Layer.Ground0 && rightTile < mainLayer && leftTile == mainLayer && topTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Right];
+      else if (mainLayer > Layer.Ground0 && bottomTile < mainLayer && leftTile == mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.Bottom];
+      else if (mainLayer > Layer.Ground0 && leftTile < mainLayer && topTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Left];
+
+      else if (mainLayer < Layer.Ground0 && cornerTopLeft > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopLeft];
+      else if (mainLayer < Layer.Ground0 && cornerTopRight > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopRight];
+      else if (mainLayer < Layer.Ground0 && cornerBottomLeft > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomLeft];
+      else if (mainLayer < Layer.Ground0 && cornerBottomRight > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomRight];
+
+      else if (mainLayer > Layer.Ground0 && cornerTopLeft < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopLeft];
+      else if (mainLayer > Layer.Ground0 && cornerTopRight < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopRight];
+      else if (mainLayer > Layer.Ground0 && cornerBottomLeft < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomLeft];
+      else if (mainLayer > Layer.Ground0 && cornerBottomRight < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomRight];
       else return tilesID[TilePosition.Center];
     }
   }
