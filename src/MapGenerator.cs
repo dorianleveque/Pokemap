@@ -115,7 +115,8 @@ namespace pokemongenerator
           float x = (float)line.tiles.IndexOf(tile);
           switch (GetLayer(x, y))
           {
-            case Layer.DeepOcean: tile.id = GetCorrectLayerTile(x, y, Layer.DeepOcean, TilesDeepOcean); break;
+            case Layer.DeepOcean: tile.id = GetCorrectLayerTile(x, y, Layer.DeepOcean, TilesDeepOcean);
+             break;
             case Layer.Ocean: tile.id = GetCorrectLayerTile(x, y, Layer.Ocean, TilesOcean); break;
             case Layer.Beach: tile.id = GetCorrectLayerTile(x, y, Layer.Beach, TilesBeach); break;
             case Layer.Ground0: tile.id = GetCorrectLayerTile(x, y, Layer.Ground0, TilesGround); break;
@@ -126,6 +127,7 @@ namespace pokemongenerator
         });
       });
       AddHouses(20);
+      AddPath();
     }
 
     private void AddHouses(int number)
@@ -145,9 +147,6 @@ namespace pokemongenerator
         if (AddHouse(x,y,categorie) == true ){
           count += 1 ;
         }
-        
-        
-
 
       } 
         
@@ -159,14 +158,16 @@ namespace pokemongenerator
       int start_id = 0;
       int column = 0;
       int row = 0;
+      int x_step = 0;
+      int y_step = 0;
       //set each type of houses's parameters
       switch (categorie){ 
-        case 0 : start_id = 147 ; column = 4 ; row= 4 ;  break;
-        case 1 : start_id = 231 ; column = 5 ; row= 5 ;  break;
-        case 2 : start_id = 236 ; column = 4 ; row= 5 ;  break;
-        case 3 : start_id = 240 ; column = 7 ; row= 5 ;  break;
-        case 4 : start_id = 132 ; column = 5 ; row= 5 ;  break;
-        case 5 : start_id = 16 ; column = 4 ; row= 5 ;  break;}
+        case 0 : start_id = 147 ; column = 4 ; row= 4 ; y_step = 4 ; x_step = 1 ;  break;
+        case 1 : start_id = 231 ; column = 5 ; row= 5 ; y_step = 5 ; x_step = 2 ; break;
+        case 2 : start_id = 236 ; column = 4 ; row= 5 ; y_step = 5 ; x_step = 1 ;  break;
+        case 3 : start_id = 240 ; column = 7 ; row= 5 ; y_step = 5 ; x_step = 4 ;  break;
+        case 4 : start_id = 132 ; column = 5 ; row= 5 ; y_step = 5 ; x_step = 2 ; break;
+        case 5 : start_id = 16 ; column = 4 ; row= 5 ; y_step = 5 ; x_step = 1 ; break;}
 
       try {
           // check if it's on grass
@@ -183,14 +184,51 @@ namespace pokemongenerator
           }}
 
       }
-
       catch (Exception e){
         return false;
       }
 
+      SetTile(x+x_step,y+y_step, 89 );
+
 
 
       return true; // if it's impossible to put house
+    }
+
+    private void AddPath(){
+
+      Random r = new Random();
+      int x;
+      int y;
+      int height = generator.Map.lines.Count ;
+      int width = generator.Map.lines[0].tiles.Count;
+      int count  = 0 ;
+
+
+       while (count < 3 )
+      {
+        try {
+          y = r.Next(1,height);
+          x = r.Next(1,width);
+          for (int i = 0; i < 3 ; i++){
+            for (int j = 0; j < 3 ; j++) {
+              if (GetTileId(x+j,y+i) != 34) {
+                throw new Exception();
+              } 
+            }}
+
+          for (int i = 0; i < 3 ; i++){
+            for (int j = 0; j < 3 ; j++) {
+              SetTile(x+j,y+i, 89 );
+            }}
+          count += 1 ;
+        }
+        catch (Exception e){
+          
+        }
+      }
+
+
     }
 
     private void SetTile (int x , int y, int id){
