@@ -125,8 +125,81 @@ namespace pokemongenerator
           }
         });
       });
+      AddHouses(20);
     }
 
+    private void AddHouses(int number)
+    {
+      Random r = new Random();
+      int count  = 0 ;
+      int x;
+      int y;
+      int categorie = 0;
+      int height = generator.Map.lines.Count ;
+      int width = generator.Map.lines[0].tiles.Count;
+      while (count < number )
+      {
+        y = r.Next(1,height);
+        x = r.Next(1,width);
+        categorie = r.Next(0,6);
+        if (AddHouse(x,y,categorie) == true ){
+          count += 1 ;
+        }
+        
+        
+
+
+      } 
+        
+
+    }
+
+    private bool AddHouse(int x, int y , int categorie = 0)
+    {
+      int start_id = 0;
+      int column = 0;
+      int row = 0;
+      //set each type of houses's parameters
+      switch (categorie){ 
+        case 0 : start_id = 147 ; column = 4 ; row= 4 ;  break;
+        case 1 : start_id = 231 ; column = 5 ; row= 5 ;  break;
+        case 2 : start_id = 236 ; column = 4 ; row= 5 ;  break;
+        case 3 : start_id = 240 ; column = 7 ; row= 5 ;  break;
+        case 4 : start_id = 132 ; column = 5 ; row= 5 ;  break;
+        case 5 : start_id = 16 ; column = 4 ; row= 5 ;  break;}
+
+      try {
+          // check if it's on grass
+        for (int i = 0; i < row+4 ; i++){
+          for (int j = 0; j < column+4 ; j++) {
+            if (GetTileId(x-2+j,y-2+i) != 34) {
+              return false;
+            } 
+          }}
+          // place les blocs de maison
+        for (int i = 0; i < row ; i++){
+          for (int j = 0; j < column ; j++) {
+            SetTile(x+j,y+i,start_id + j + i*21+1);
+          }}
+
+      }
+
+      catch (Exception e){
+        return false;
+      }
+
+
+
+      return true; // if it's impossible to put house
+    }
+
+    private void SetTile (int x , int y, int id){
+      generator.Map.lines[y].tiles[x].id= id; 
+    }
+
+    private int GetTileId(int x, int y) {
+      return generator.Map.lines[y].tiles[x].id;
+    }
     /** 
     * Get the layer type for each positions on the map
     */
