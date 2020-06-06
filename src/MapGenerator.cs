@@ -4,14 +4,11 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
 using tiled;
+using AStarSharp;
+using System.Numerics;
 
 namespace pokemongenerator
 {
-
-   struct Pos{
-    public int x;
-    public int y;
-}
   public class MapGenerator
   {
     public readonly List<GenerationStep> Steps = new List<GenerationStep>();
@@ -53,8 +50,8 @@ namespace pokemongenerator
     private Dictionary<TilePosition, int> TilesOcean = new Dictionary<TilePosition, int>();
     private Dictionary<TilePosition, int> TilesBeach = new Dictionary<TilePosition, int>();
     private Dictionary<TilePosition, int> TilesGround = new Dictionary<TilePosition, int>();
-    private List<Pos> doorSteps = new List<Pos>();
-    private List<Pos> centers = new List<Pos>();
+    private List<Vector2> doorSteps = new List<Vector2>();
+    private List<Vector2> centers = new List<Vector2>();
     public TerrainGenerator(int seed)
     {
       n = new FastNoise(seed);
@@ -198,8 +195,12 @@ namespace pokemongenerator
       catch (Exception e){
         return false;
       }
-      doorSteps.Add(new Pos(){x= x+x_step,y=y+y_step});
-      SetTile(x+x_step,y+y_step, 89 );
+     
+      var step = new Vector2();
+      step.X=x+x_step;
+      step.Y=y+y_step;
+      doorSteps.Add(step);
+      SetTile((int)step.X,(int)step.Y, 89 );
 
 
 
@@ -234,7 +235,10 @@ namespace pokemongenerator
             for (int i = 0; i < 3 ; i++){
             for (int j = 0; j < 3 ; j++) {
               SetTile((int)x+j,(int)y+i, 89 );
-              centers.Add(new Pos(){x= (int)x+j,y=(int)y+i});
+              var center = new Vector2();
+              center.X= (int)x+j;
+              center.Y= (int)y+i;
+              centers.Add(center);
             }}
 
           }
@@ -242,45 +246,52 @@ namespace pokemongenerator
         });});
     }
     private void AddPath(){
+      
+      List<List<Node>> temp_map = new List<List<Node>>();
+      generator.Map.lines.ForEach((line) =>
+      {
+        int y = generator.Map.lines.IndexOf(line);
+        temp_map.Add(new List<Node>());
+        line.tiles.ForEach((tile) =>
+        {
+          int x = line.tiles.IndexOf(tile);
+          if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34 ){
+              temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true));
+          }
+          else {
+              temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),false));
+          }
+        });});
+   
+      Astar astar = new Astar(temp_map);
+
 
         foreach (var coord in doorSteps){
-                var cur_x = coord.x;
-                var cur_y = coord.y;
+                var cur_x = coord.X;
+                var cur_y = coord.Y;
                 var moy_x = 0;
                 var moy_y = 0;
-                var dist = 1000;
+                var dist = 100000.0;
                 // find closest center
               foreach (var coord_moy in centers){
-                if (((cur_x-coord_moy.x)*(cur_x-coord_moy.x)+(cur_y-coord_moy.y)*(cur_y-coord_moy.y)) < dist*dist )
+                if (((cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.X)*(cur_y-coord_moy.Y)) < dist )
                 {
-                  moy_x = coord_moy.x;
-                  moy_y = coord_moy.y;
+                  moy_x = (int)coord_moy.X;
+                  moy_y = (int)coord_moy.Y;
+                  dist = (cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.Y)*(cur_y-coord_moy.Y);
                 }
               }
-                //Create paths to center
-                while (true){
-                    if (cur_x > moy_x & (GetTileId(cur_x-1,cur_y)==89 | GetTileId(cur_x-1,cur_y)==34)){
-                        cur_x = cur_x-1;
-                    }
-                    else if (cur_x < moy_x & (GetTileId(cur_x+1,cur_y)==89 | GetTileId(cur_x+1,cur_y)==34)){
-                        cur_x = cur_x+1;
-                    }
-                    else if (cur_y > moy_y & (GetTileId(cur_x,cur_y-1)==89 | GetTileId(cur_x,cur_y-1)==34)){
-                        cur_y = cur_y-1;
-                    }
-                    else if (cur_y < moy_y & (GetTileId(cur_x,cur_y+1)==89 | GetTileId(cur_x,cur_y+1)==34)){
-                        cur_y = cur_y+1;
-                    }
-                    else if (cur_y == moy_y & cur_y == moy_y){
-                        break;
-                    }
-                    else{
-                      break;
-                    }
-                    SetTile(cur_x,cur_y,89);
-                    //map.display();
-                    }
- 
+              var path = astar.FindPath(new Vector2(cur_x,cur_y), new Vector2(moy_x,moy_y));
+              try {
+                foreach (Node node in path)
+                {
+                  SetTile((int)node.Position.X,(int)node.Position.Y,89);
+                }
+              }
+              catch (Exception e){
+                Console.Write("No path availible");
+              }
+
             }
 
       generator.Map.lines.ForEach((line) =>
@@ -302,17 +313,15 @@ namespace pokemongenerator
             if (GetTileId(x, y-1) == 34){
                 SetTile(x, y-1,68); 
             }
-
-
-
           }
-
         });});
 
 
 
 
     }
+
+
 
     private void SetTile (int x , int y, int id){
       generator.Map.lines[y].tiles[x].id= id; 
@@ -333,7 +342,7 @@ namespace pokemongenerator
         case float n when (n < 0.0f): return Layer.Beach;
         case float n when (n < 0.02f): return Layer.Ground0;
         case float n when (n < 0.55f): return Layer.Ground1;
-        case float n when (n < 0.8f): return Layer.Ground2;
+        //case float n when (n < 0.8f): return Layer.Ground2;
         default: return Layer.Ground3;
       }
       
