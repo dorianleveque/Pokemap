@@ -7,14 +7,21 @@ using tiled;
 
 namespace pokemongenerator
 {
+
+   struct Pos{
+    public int x;
+    public int y;
+}
   public class MapGenerator
   {
     public readonly List<GenerationStep> Steps = new List<GenerationStep>();
     public TiledMap Map;
+    public int houseNum;
 
-    public MapGenerator(int width, int height)
+    public MapGenerator(int width, int height, int houseNum)
     {
       Map = new TiledMap(width, height, "Terrain.tsx");
+      this.houseNum = houseNum;
     }
     public void AddStep(GenerationStep step)
     {
@@ -46,6 +53,8 @@ namespace pokemongenerator
     private Dictionary<TilePosition, int> TilesOcean = new Dictionary<TilePosition, int>();
     private Dictionary<TilePosition, int> TilesBeach = new Dictionary<TilePosition, int>();
     private Dictionary<TilePosition, int> TilesGround = new Dictionary<TilePosition, int>();
+    private List<Pos> doorSteps = new List<Pos>();
+    private List<Pos> centers = new List<Pos>();
     public TerrainGenerator(int seed)
     {
       n = new FastNoise(seed);
@@ -104,6 +113,7 @@ namespace pokemongenerator
       TilesGround.Add(TilePosition.CornerTopRight, 96);
       TilesGround.Add(TilePosition.CornerBottomLeft, 76);
       TilesGround.Add(TilePosition.CornerBottomRight, 75);
+
     }
     public override void run()
     {
@@ -126,7 +136,8 @@ namespace pokemongenerator
           }
         });
       });
-      AddHouses(20);
+      AddCenters();
+      AddHouses(generator.houseNum);
       AddPath();
     }
 
@@ -187,7 +198,7 @@ namespace pokemongenerator
       catch (Exception e){
         return false;
       }
-
+      doorSteps.Add(new Pos(){x= x+x_step,y=y+y_step});
       SetTile(x+x_step,y+y_step, 89 );
 
 
@@ -195,38 +206,110 @@ namespace pokemongenerator
       return true; // if it's impossible to put house
     }
 
+
+    private void AddCenters(){
+      
+      float value;
+      float value_top;
+      float value_bottom;
+      float value_right;
+      float value_left;
+      
+
+      generator.Map.lines.ForEach((line) =>
+      {
+        float y = (float)generator.Map.lines.IndexOf(line);
+        line.tiles.ForEach((tile) =>
+        {
+          float x = (float)line.tiles.IndexOf(tile);
+          
+          value = n.GetNoise(x, y);
+          value_top = n.GetNoise(x, y-1);
+          value_bottom = n.GetNoise(x, y+1);
+          value_right = n.GetNoise(x+1, y);
+          value_left = n.GetNoise(x-1, y);
+          
+          if (value > value_bottom && value > value_top && value > value_right && value > value_left)
+          {
+            for (int i = 0; i < 3 ; i++){
+            for (int j = 0; j < 3 ; j++) {
+              SetTile((int)x+j,(int)y+i, 89 );
+              centers.Add(new Pos(){x= (int)x+j,y=(int)y+i});
+            }}
+
+          }
+
+        });});
+    }
     private void AddPath(){
 
-      Random r = new Random();
-      int x;
-      int y;
-      int height = generator.Map.lines.Count ;
-      int width = generator.Map.lines[0].tiles.Count;
-      int count  = 0 ;
+        foreach (var coord in doorSteps){
+                var cur_x = coord.x;
+                var cur_y = coord.y;
+                var moy_x = 0;
+                var moy_y = 0;
+                var dist = 1000;
+                // find closest center
+              foreach (var coord_moy in centers){
+                if (((cur_x-coord_moy.x)*(cur_x-coord_moy.x)+(cur_y-coord_moy.y)*(cur_y-coord_moy.y)) < dist*dist )
+                {
+                  moy_x = coord_moy.x;
+                  moy_y = coord_moy.y;
+                }
+              }
+                //Create paths to center
+                while (true){
+                    if (cur_x > moy_x & (GetTileId(cur_x-1,cur_y)==89 | GetTileId(cur_x-1,cur_y)==34)){
+                        cur_x = cur_x-1;
+                    }
+                    else if (cur_x < moy_x & (GetTileId(cur_x+1,cur_y)==89 | GetTileId(cur_x+1,cur_y)==34)){
+                        cur_x = cur_x+1;
+                    }
+                    else if (cur_y > moy_y & (GetTileId(cur_x,cur_y-1)==89 | GetTileId(cur_x,cur_y-1)==34)){
+                        cur_y = cur_y-1;
+                    }
+                    else if (cur_y < moy_y & (GetTileId(cur_x,cur_y+1)==89 | GetTileId(cur_x,cur_y+1)==34)){
+                        cur_y = cur_y+1;
+                    }
+                    else if (cur_y == moy_y & cur_y == moy_y){
+                        break;
+                    }
+                    else{
+                      break;
+                    }
+                    SetTile(cur_x,cur_y,89);
+                    //map.display();
+                    }
+ 
+            }
 
-
-       while (count < 3 )
+      generator.Map.lines.ForEach((line) =>
       {
-        try {
-          y = r.Next(1,height);
-          x = r.Next(1,width);
-          for (int i = 0; i < 3 ; i++){
-            for (int j = 0; j < 3 ; j++) {
-              if (GetTileId(x+j,y+i) != 34) {
-                throw new Exception();
-              } 
-            }}
+        int y = generator.Map.lines.IndexOf(line);
+        line.tiles.ForEach((tile) =>
+        {
+          int x = line.tiles.IndexOf(tile);
+          if (GetTileId(x, y) == 89){
+            if (GetTileId(x+1, y) == 34){
+                SetTile(x+1, y,90);
+            }
+            if (GetTileId(x-1, y) == 34){
+                SetTile(x-1, y,88);  
+            }
+            if (GetTileId(x, y+1) == 34){
+                SetTile(x, y+1,110); 
+            }
+            if (GetTileId(x, y-1) == 34){
+                SetTile(x, y-1,68); 
+            }
 
-          for (int i = 0; i < 3 ; i++){
-            for (int j = 0; j < 3 ; j++) {
-              SetTile(x+j,y+i, 89 );
-            }}
-          count += 1 ;
-        }
-        catch (Exception e){
-          
-        }
-      }
+
+
+          }
+
+        });});
+
+
 
 
     }
@@ -253,6 +336,7 @@ namespace pokemongenerator
         case float n when (n < 0.8f): return Layer.Ground2;
         default: return Layer.Ground3;
       }
+      
     }
 
     /**
