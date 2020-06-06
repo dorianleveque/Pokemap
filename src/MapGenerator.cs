@@ -357,7 +357,7 @@ namespace pokemongenerator
         case float n when (n < 0.02f): return Layer.Ground0;
         case float n when (n < 0.55f): return Layer.Ground1;
         //case float n when (n < 0.8f): return Layer.Ground2;
-        default: return Layer.Ground3;
+        default: return Layer.Ground1;
       }
       
     }
