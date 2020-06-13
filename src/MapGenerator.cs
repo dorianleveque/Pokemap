@@ -198,10 +198,10 @@ namespace pokemongenerator
      
       var step = new Vector2();
       step.X=x+x_step;
-      step.Y=y+y_step;
+      step.Y=y+y_step+1;
       doorSteps.Add(step);
       SetTile((int)step.X,(int)step.Y, 89 );
-
+      SetTile((int)step.X,(int)step.Y-1, 89 );
 
 
       return true; // if it's impossible to put house
@@ -246,7 +246,7 @@ namespace pokemongenerator
         });});
     }
     private void AddPath(){
-      
+      // Create map for A* lib
       List<List<Node>> temp_map = new List<List<Node>>();
       generator.Map.lines.ForEach((line) =>
       {
@@ -256,7 +256,14 @@ namespace pokemongenerator
         {
           int x = line.tiles.IndexOf(tile);
           if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34 ){
-              temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true));
+              if ((GetTileId(x-1,y) == 89 || GetTileId(x-1,y) == 34) && (GetTileId(x+1,y) == 89 || GetTileId(x+1,y) == 34)
+               || (GetTileId(x,y-1) == 89 || GetTileId(x,y-1) == 34) && (GetTileId(x,y+1) == 89 || GetTileId(x,y+1) == 34)  ){
+                  temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true));
+               }
+               else {
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,100));
+               }
+              
           }
           else {
               temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),false));
@@ -281,6 +288,7 @@ namespace pokemongenerator
                   dist = (cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.Y)*(cur_y-coord_moy.Y);
                 }
               }
+              // find paths between targer 
               var path = astar.FindPath(new Vector2(cur_x,cur_y), new Vector2(moy_x,moy_y));
               try {
                 foreach (Node node in path)
@@ -328,7 +336,13 @@ namespace pokemongenerator
     }
 
     private int GetTileId(int x, int y) {
-      return generator.Map.lines[y].tiles[x].id;
+      try {
+        return generator.Map.lines[y].tiles[x].id;
+      }
+      catch (Exception e){
+        return 0;
+      }
+      
     }
     /** 
     * Get the layer type for each positions on the map
@@ -343,7 +357,7 @@ namespace pokemongenerator
         case float n when (n < 0.02f): return Layer.Ground0;
         case float n when (n < 0.55f): return Layer.Ground1;
         //case float n when (n < 0.8f): return Layer.Ground2;
-        default: return Layer.Ground3;
+        default: return Layer.Ground1;
       }
       
     }
