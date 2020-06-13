@@ -3,6 +3,8 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
+using System.Collections;
+using System.Drawing;
 
 namespace tiled
 {
@@ -79,6 +81,30 @@ namespace tiled
         )
       );
       xMap.Save("./assets/pokemap.tmx");
+    }
+
+    public void savePicture()
+    {
+    List<byte> bytes = new List<byte>(); // this list should be filled with values
+    int bpp = 24;
+
+    Bitmap bmp = new Bitmap(width, height);
+
+      lines.ForEach(line => {
+        line.tiles.ForEach(tile => {
+          int y = lines.IndexOf(line);
+          int x = line.tiles.IndexOf(tile);
+          int i = ((y * width) + x) * (bpp / 8);
+          // first byte will be red, because you are writing it as first value
+          Int32 r = tile.id <= 255 ? (Int32)tile.id : 0;
+          Int32 g = tile.id > 255 && tile.id <= 510 ? (Int32)tile.id-255 : 0;
+          Int32 b = tile.id > 510 && tile.id < 765 ? (Int32)tile.id-510 : 0;
+
+          Color color = Color.FromArgb(r, g, b);
+          bmp.SetPixel(x, y, color); 
+        });
+      });
+      bmp.Save("./assets/wfc.png");
     }
 
     public override string ToString()

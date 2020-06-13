@@ -32,6 +32,7 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
+      Map.savePicture();
     }
   }
 
