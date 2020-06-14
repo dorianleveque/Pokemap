@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using System.Linq;
 using System.Collections;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace tiled
 {
@@ -85,6 +86,8 @@ namespace tiled
 
     public void savePicture()
     {
+    Console.WriteLine("Saving procedurally generated level as Bitmap");
+
     List<byte> bytes = new List<byte>(); // this list should be filled with values
     int bpp = 24;
 
@@ -106,11 +109,81 @@ namespace tiled
       });
       bmp.Save("./assets/wfc.png");
     }
+  public void processPicture(){
+    Console.WriteLine("Launching WFC on Bitmap file");
+
+    Process.Start("cmd.exe",  @"/C .\bin\DeBroglie.Console.exe .\assets\pokemap.json").WaitForExit();
+  }
+
+  public void convertPicture(){
+    Console.WriteLine("Converting generated bitmap to tmx");
+    Bitmap img = new Bitmap("assets/wfc-generated.png");
+    for (int i = 0; i < img.Width; i++)
+    {
+        for (int j = 0; j < img.Height; j++)
+        {
+            Color pixel = img.GetPixel(i,j);
+            var r = (Int32)pixel.R;
+            var g = (Int32)pixel.G;
+            var b = (Int32)pixel.B;
+
+
+            if (r==0)
+            {
+                 if (g ==0){
+                   lines[j].tiles[i].id = b + 510; 
+                 }
+                 else {
+                   lines[j].tiles[i].id = g + 255; 
+                 }
+            }
+            else {
+              lines[j].tiles[i].id = r; 
+            }
+        }
+    } 
+
+
+    XDocument xMap = new XDocument(
+        new XElement("map",
+          new XAttribute("version", "1.2"),
+          new XAttribute("tiledversion", "1.3.4"),
+          new XAttribute("orientation", "orthogonal"),
+          new XAttribute("renderorder", "left-down"),
+          new XAttribute("width", this.width),
+          new XAttribute("height", this.height),
+          new XAttribute("tilewidth", 16),
+          new XAttribute("tileheight", 16),
+          new XAttribute("infinite", 0),
+          new XAttribute("backgroundcolor", "#00000000"),
+          new XAttribute("nextlayerid", 5),
+          new XAttribute("nextobjectid", 1),
+          new XElement("tileset",
+            new XAttribute("firstgid", 1),
+            new XAttribute("source", this.tilesetPath)
+          ),
+          new XElement("layer",
+            new XAttribute("name", "ground"),
+            new XAttribute("width", this.width),
+            new XAttribute("height", this.height),
+            new XElement("data",
+              new XAttribute("encoding", "csv"),
+              this.ToString()
+            )
+          )
+        )
+      );
+      xMap.Save("./assets/pokemap-generated.tmx");
+
+  }
+
 
     public override string ToString()
     {
       return String.Join(",\n", lines.ConvertAll(line => line.ToString()).ToArray() );
     }
+
+  
 
     private void initMap()
     {

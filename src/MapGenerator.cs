@@ -33,6 +33,8 @@ namespace pokemongenerator
       });
       Map.save();
       Map.savePicture();
+      Map.processPicture();
+      Map.convertPicture();
     }
   }
 
@@ -162,6 +164,7 @@ namespace pokemongenerator
         categorie = r.Next(1,6);
         if (AddHouse(x,y,categorie) == true ){
           count += 1 ;
+          i=0;
         }
         i+=1;
       } 
@@ -188,8 +191,8 @@ namespace pokemongenerator
       try {
           // check if it's on grass
         for (int i = 0; i < row+4 ; i++){
-          for (int j = 0; j < column+4 ; j++) {
-            if (GetTileId(x-2+j,y-2+i) != 34) {
+          for (int j = 0; j < column ; j++) {
+            if (GetTileId(x+j,y-2+i) != 34) {
               return false;
             } 
           }}
@@ -282,7 +285,7 @@ namespace pokemongenerator
                }  
 
                else {
-                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,10));
                }
           }
           //if it's sand :
@@ -296,6 +299,9 @@ namespace pokemongenerator
               temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),false));
           }
         });});
+        foreach (var coord in doorSteps){
+          temp_map[(int)coord.Y+1][(int)coord.X] = new Node(new System.Numerics.Vector2((int)coord.Y+1,(int)coord.X),true, 0) ;
+        }
    
       Astar astar = new Astar(temp_map);
 

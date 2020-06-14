@@ -1,0 +1,11 @@
+{
+    "src": "wfc.png",
+    "dest": "wfc-generated.png",
+    "width" : "200",
+    "height" : "200",
+    "backtrack" :"true",
+    "model": {
+        "type": "overlapping",
+        "n": 3
+    }
+}
