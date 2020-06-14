@@ -279,10 +279,10 @@ namespace pokemongenerator
                 var cur_y = coord.Y;
                 var moy_x = 0;
                 var moy_y = 0;
-                var dist = 100000.0;
+                var dist = 10000000.0;
                 // find closest center
               foreach (var coord_moy in centers){
-                if (((cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.X)*(cur_y-coord_moy.Y)) < dist )
+                if (((cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.Y)*(cur_y-coord_moy.Y)) < dist )
                 {
                   moy_x = (int)coord_moy.X;
                   moy_y = (int)coord_moy.Y;
