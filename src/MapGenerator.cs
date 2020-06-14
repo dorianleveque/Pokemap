@@ -148,15 +148,22 @@ namespace pokemongenerator
       int categorie = 0;
       int height = generator.Map.lines.Count ;
       int width = generator.Map.lines[0].tiles.Count;
+
+      y = r.Next(1,height);
+      var i = 0;
       while (count < number )
       {
-        y = r.Next(1,height);
+        if (i > 20){
+            y = r.Next(1,height);
+            i = 0;
+
+        }
         x = r.Next(1,width);
-        categorie = r.Next(0,6);
+        categorie = r.Next(1,6);
         if (AddHouse(x,y,categorie) == true ){
           count += 1 ;
         }
-
+        i+=1;
       } 
         
 
@@ -233,8 +240,8 @@ namespace pokemongenerator
           
           if (value > value_bottom && value > value_top && value > value_right && value > value_left)
           {
-            for (int i = 0; i < 3 ; i++){
-            for (int j = 0; j < 3 ; j++) {
+            for (int i = 0; i < 5 ; i++){
+            for (int j = 0; j < 5 ; j++) {
               SetTile((int)x+j,(int)y+i, 89 );
               var center = new Vector2();
               center.X= (int)x+j;
@@ -256,15 +263,34 @@ namespace pokemongenerator
         line.tiles.ForEach((tile) =>
         {
           int x = line.tiles.IndexOf(tile);
-          if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34 ){
+          //if it's a cliff side :
+          if (GetTileId(x,y) == 55 && GetTileId(x-1,y) == 55 &&  GetTileId(x+1,y) == 55 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+          }
+          else if (GetTileId(x,y) == 33 && GetTileId(x,y-1) == 33 &&  GetTileId(x,y+1) == 33 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+          }
+          else if (GetTileId(x,y) == 35 && GetTileId(x,y-1) == 35 &&  GetTileId(x,y+1) == 35 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+          }
+
+          //if it's grass or path :
+          else if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34  ){
               if ((GetTileId(x-1,y) == 89 || GetTileId(x-1,y) == 34) && (GetTileId(x+1,y) == 89 || GetTileId(x+1,y) == 34)
                || (GetTileId(x,y-1) == 89 || GetTileId(x,y-1) == 34) && (GetTileId(x,y+1) == 89 || GetTileId(x,y+1) == 34)  ){
                   temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true));
-               }
+               }  
+
                else {
-                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,100));
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
                }
-              
+          }
+          //if it's sand :
+          else if (GetTileId(x,y) == 72 || GetTileId(x,y) == 73 || GetTileId(x,y) == 74 || GetTileId(x,y) == 93 || GetTileId(x,y) == 94
+          || GetTileId(x,y) == 95 || GetTileId(x,y) == 114 || GetTileId(x,y) == 114 || GetTileId(x,y) == 115 ){
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,2));
+            
+
           }
           else {
               temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),false));
@@ -294,7 +320,29 @@ namespace pokemongenerator
               try {
                 foreach (Node node in path)
                 {
-                  SetTile((int)node.Position.X,(int)node.Position.Y,89);
+                  var temp_x = (int)node.Position.X;
+                  var temp_y = (int)node.Position.Y;
+                  if (GetTileId(temp_x,temp_y) == 33){
+                    SetTile(temp_x,temp_y,163);
+                    SetTile(temp_x,temp_y-1,143);
+                    SetTile(temp_x,temp_y+1,185);
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 35){
+                    SetTile(temp_x,temp_y,164);
+                    SetTile(temp_x,temp_y-1,144);
+                    SetTile(temp_x,temp_y+1,186);
+                    
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 55){
+                    SetTile(temp_x,temp_y,125);
+                    SetTile(temp_x-1,temp_y,124);
+                    SetTile(temp_x+1,temp_y,126);
+                    
+                  }
+                  else {
+                    SetTile(temp_x,temp_y,89);
+                  }
+                  
                 }
               }
               catch (Exception e){
