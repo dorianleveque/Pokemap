@@ -34,9 +34,9 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
-      Map.savePicture();
-      Map.processPicture();
-      Map.convertPicture();
+      //Map.savePicture();
+      //Map.processPicture();
+      //Map.convertPicture();
     }
   }
 
@@ -171,7 +171,7 @@ namespace pokemongenerator
         for (int y = 0; y < height; y++)
         {
           int tileGroundId = tiles[TileType.Ground][TilePosition.Center];
-          if (isEnoughPlace(x, y, tileGroundId, 2, 4) && (GetTileId(x, y-1) == 34 || GetTileId(x, y-1) == 99) && !searchTileAround(x, y, tiles[TileType.GroundPath], 4))
+          if (isEnoughPlace(x, y, tileGroundId, 2, 4) && (GetTileId(x, y-1) == 34 || GetTileId(x, y-1) == 99) && (x%2 == 0) && (y%4==0) && !searchTileAround(x, y, tiles[TileType.GroundPath], 3))
           {
             SetTile(x, y, 15);
             SetTile(x + 1, y, 16);
@@ -237,7 +237,7 @@ namespace pokemongenerator
               if (!searchTileAround(x, y, tiles[TileType.GroundPath], 8) && r.NextDouble() >= 0.90) SetTile(x, y, 2); // tall grass
               if (GetTileId(x, y + 1) == tiles[TileType.GroundPath][TilePosition.Top] && r.NextDouble() >= 0.92) SetTile(x, y, 44); // sign
               if (r.NextDouble() >= 0.98) SetTile(x, y, r.Next(3, 6)); // flowers
-              if (r.NextDouble() >= 0.999) SetTile(x, y, 46); // pokeball
+              if (r.NextDouble() >= 0.9995) SetTile(x, y, 46); // pokeball
               break;
           }
         });
