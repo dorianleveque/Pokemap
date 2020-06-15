@@ -111,8 +111,7 @@ namespace tiled
     }
   public void processPicture(){
     Console.WriteLine("Launching WFC on Bitmap file");
-
-    Process.Start("cmd.exe",  @"/C .\bin\DeBroglie.Console.exe .\assets\pokemap.json").WaitForExit();
+    Process.Start("cmd.exe",  @"/C .\lib\DeBroglie\bin\DeBroglie.Console.exe .\assets\pokemap.json").WaitForExit();
   }
 
   public void convertPicture(){

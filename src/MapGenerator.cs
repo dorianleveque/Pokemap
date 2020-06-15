@@ -173,8 +173,6 @@ namespace pokemongenerator
 
     private void AddTrees()
     {
-      Random r = new Random(generator.seed);
-
       int height = generator.Map.lines.Count;
       int width = generator.Map.lines[0].tiles.Count;
 

@@ -28,9 +28,9 @@ namespace pokemongenerator
       {
         switch (args.Length)
         {
-          case 3: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]))).Generate(); break;
-          case 4: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]), args[3])).Generate(); break;
-          default: Console.WriteLine("Usage: <width> <height> <number of houses> <?seed>"); break;
+          case 2: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[0]), int.Parse(args[1]))).Generate(); break;
+          case 3: (new PokemonLevelRandomizer(int.Parse(args[0]), int.Parse(args[0]), int.Parse(args[1]), args[2])).Generate(); break;
+          default: Console.WriteLine("Usage: <size> <number of houses> <?seed>"); break;
         }
       }
       catch (Exception e)
