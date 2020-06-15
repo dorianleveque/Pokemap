@@ -268,30 +268,30 @@ namespace pokemongenerator
           int x = line.tiles.IndexOf(tile);
           //if it's a cliff side :
           if (GetTileId(x,y) == 55 && GetTileId(x-1,y) == 55 &&  GetTileId(x+1,y) == 55 ){
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
           else if (GetTileId(x,y) == 33 && GetTileId(x,y-1) == 33 &&  GetTileId(x,y+1) == 33 ){
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
           else if (GetTileId(x,y) == 35 && GetTileId(x,y-1) == 35 &&  GetTileId(x,y+1) == 35 ){
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
 
           //if it's grass or path :
           else if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34  ){
               if ((GetTileId(x-1,y) == 89 || GetTileId(x-1,y) == 34) && (GetTileId(x+1,y) == 89 || GetTileId(x+1,y) == 34)
                || (GetTileId(x,y-1) == 89 || GetTileId(x,y-1) == 34) && (GetTileId(x,y+1) == 89 || GetTileId(x,y+1) == 34)  ){
-                  temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true));
+                  temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
                }  
 
                else {
-                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,10));
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,20));
                }
           }
           //if it's sand :
           else if (GetTileId(x,y) == 72 || GetTileId(x,y) == 73 || GetTileId(x,y) == 74 || GetTileId(x,y) == 93 || GetTileId(x,y) == 94
           || GetTileId(x,y) == 95 || GetTileId(x,y) == 114 || GetTileId(x,y) == 114 || GetTileId(x,y) == 115 ){
-                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,2));
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,4));
             
 
           }
@@ -300,7 +300,7 @@ namespace pokemongenerator
           }
         });});
         foreach (var coord in doorSteps){
-          temp_map[(int)coord.Y+1][(int)coord.X] = new Node(new System.Numerics.Vector2((int)coord.Y+1,(int)coord.X),true, 0) ;
+          temp_map[(int)coord.Y+1][(int)coord.X] = new Node(new System.Numerics.Vector2((int)coord.Y+1,(int)coord.X),true, 1) ;
         }
    
       Astar astar = new Astar(temp_map);
@@ -328,6 +328,8 @@ namespace pokemongenerator
                 {
                   var temp_x = (int)node.Position.X;
                   var temp_y = (int)node.Position.Y;
+                  temp_map[temp_y][temp_x] = new Node(new System.Numerics.Vector2(temp_x,temp_y),true, 1) ;
+
                   if (GetTileId(temp_x,temp_y) == 33){
                     SetTile(temp_x,temp_y,163);
                     SetTile(temp_x,temp_y-1,143);
@@ -350,9 +352,10 @@ namespace pokemongenerator
                   }
                   
                 }
+                astar = new Astar(temp_map);
               }
               catch (Exception e){
-                Console.Write("No path availible");
+                Console.Write("No path availible for one the house ");
               }
 
             }
