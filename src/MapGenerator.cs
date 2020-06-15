@@ -155,7 +155,69 @@ namespace pokemongenerator
       AddCenters();
       AddHouses(generator.houseNum);
       AddPath();
+<<<<<<< HEAD
       //AddDecorations();
+=======
+      AddTrees();
+      AddDecorations();
+>>>>>>> 02940bf384ec199564482dea435553168fecaaee
+    }
+
+    private void AddTrees()
+    {
+      Random r = new Random(generator.seed);
+
+      int height = generator.Map.lines.Count;
+      int width = generator.Map.lines[0].tiles.Count;
+
+      for (int x = 0; x < width; x++)
+      {
+        for (int y = 0; y < height; y++)
+        {
+          int tileGroundId = tiles[TileType.Ground][TilePosition.Center];
+          if (isEnoughPlace(x, y, tileGroundId, 2, 4) && (GetTileId(x, y-1) == 34 || GetTileId(x, y-1) == 99) && !searchTileAround(x, y, tiles[TileType.GroundPath], 4))
+          {
+            SetTile(x, y, 15);
+            SetTile(x + 1, y, 16);
+            SetTile(x, y + 1, 57);
+            SetTile(x + 1, y + 1, 58);
+            SetTile(x, y + 2, 78);
+            SetTile(x + 1, y + 2, 79);
+            SetTile(x, y + 3, 99);
+            SetTile(x + 1, y + 3, 100);
+          }
+        }
+      }
+      // connection between trees
+      for (int x = 0; x < width; x++)
+      {
+        for (int y = 0; y < height; y++)
+        {
+          if (GetTileId(x, y) == 78 && GetTileId(x, y+2) == 15)
+          {
+            SetTile(x, y, 36);
+            SetTile(x + 1, y, 37);
+            SetTile(x, y + 1, 57);
+            SetTile(x + 1, y + 1, 58);
+            SetTile(x, y+2, 36);
+            SetTile(x + 1, y+2, 37);
+            SetTile(x, y + 3, 57);
+            SetTile(x + 1, y + 3, 58);
+          }
+        }
+      }
+    }
+
+    private bool isEnoughPlace(int x, int y, int tile, int sizeX, int sizeY)
+    {
+      for (int sy = 0; sy < sizeY; sy++)
+      {
+        for (int sx = 0; sx < sizeX; sx++)
+        {
+          if (GetTileId(x + sx, y + sy) != tile) return false;
+        }
+      }
+      return true;
     }
 
     private void AddDecorations()
