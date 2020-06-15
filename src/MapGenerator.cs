@@ -155,7 +155,7 @@ namespace pokemongenerator
       AddCenters();
       AddHouses(generator.houseNum);
       AddPath();
-      AddDecorations();
+      //AddDecorations();
     }
 
     private void AddDecorations()
