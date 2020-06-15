@@ -34,9 +34,9 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
-      Map.savePicture();
-      Map.processPicture();
-      Map.convertPicture();
+     // Map.savePicture();
+     // Map.processPicture();
+     // Map.convertPicture();
     }
   }
 
@@ -131,7 +131,7 @@ namespace pokemongenerator
     public override void run()
     {
       n = new FastNoise(generator.seed);
-      n.SetNoiseType(FastNoise.NoiseType.Perlin);
+      n.SetNoiseType(FastNoise.NoiseType.Value);
       n.SetFrequency(0.02f);
       generator.Map.lines.ForEach((line) =>
       {
@@ -140,17 +140,6 @@ namespace pokemongenerator
         {
           float x = (float)line.tiles.IndexOf(tile);
           tile.id = GetCorrectLayerTile(x, y);
-          /*switch (GetLayer(x, y))
-          {
-            case Layer.DeepOcean: 
-             break;
-            case Layer.Ocean: tile.id = GetCorrectLayerTile(x, y, Layer.Ocean, TilesOcean); break;
-            case Layer.Beach: tile.id = GetCorrectLayerTile(x, y, Layer.Beach, TilesBeach); break;
-            case Layer.Ground0: tile.id = GetCorrectLayerTile(x, y, Layer.Ground0, TilesGround); break;
-            case Layer.Ground1: tile.id = GetCorrectLayerTile(x, y, Layer.Ground1, TilesGround); break;
-            case Layer.Ground2: tile.id = GetCorrectLayerTile(x, y, Layer.Ground2, TilesGround); break;
-            case Layer.Ground3: tile.id = GetCorrectLayerTile(x, y, Layer.Ground3, TilesGround); break;
-          }*/
         });
       });
       AddCenters();
@@ -423,13 +412,12 @@ namespace pokemongenerator
     {
       switch (n.GetNoise(x, y))
       {
-        case float n when (n < -0.2f): return Layer.DeepOcean;
+        case float n when (n < -0.4f): return Layer.DeepOcean;
         case float n when (n < -0.1f): return Layer.Ocean;
-        case float n when (n < 0.0f): return Layer.Beach;
-        case float n when (n < 0.02f): return Layer.Ground0;
-        case float n when (n < 0.55f): return Layer.Ground1;
-        //case float n when (n < 0.8f): return Layer.Ground2;
-        default: return Layer.Ground1;
+        case float n when (n < 0.05f): return Layer.Beach;
+        case float n when (n < 0.15f): return Layer.Ground0;
+        case float n when (n < 0.8f): return Layer.Ground1;
+        default: return Layer.Ground2;
       }
       
     }
@@ -459,10 +447,10 @@ namespace pokemongenerator
       else if (currentLayer > Layer.Ground0 && bottomTile < currentLayer && leftTile < currentLayer && rightTile == currentLayer && topTile == currentLayer) return layerTiles[currentLayer][TilePosition.BottomLeft];
       else if (currentLayer > Layer.Ground0 && bottomTile < currentLayer && rightTile < currentLayer && leftTile == currentLayer && topTile == currentLayer) return layerTiles[currentLayer][TilePosition.BottomRight];
 
-      else if (currentLayer < Layer.Ground0 && topTile > currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Top];
-      else if (currentLayer < Layer.Ground0 && rightTile > currentLayer && leftTile == currentLayer && topTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Right];
-      else if (currentLayer < Layer.Ground0 && bottomTile > currentLayer && leftTile == currentLayer && rightTile == currentLayer && topTile == currentLayer) return layerTiles[currentLayer][TilePosition.Bottom];
-      else if (currentLayer < Layer.Ground0 && leftTile > currentLayer && topTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Left];
+      else if (currentLayer < Layer.Ground0 && (topTile > currentLayer || cornerTopLeft > currentLayer && cornerTopRight > currentLayer) && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Top];
+      else if (currentLayer < Layer.Ground0 && (rightTile > currentLayer || cornerTopRight > currentLayer && cornerBottomRight > currentLayer) && leftTile == currentLayer && topTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Right];
+      else if (currentLayer < Layer.Ground0 && (bottomTile > currentLayer || cornerBottomLeft > currentLayer && cornerBottomRight > currentLayer) && leftTile == currentLayer && rightTile == currentLayer && topTile == currentLayer) return layerTiles[currentLayer][TilePosition.Bottom];
+      else if (currentLayer < Layer.Ground0 && (leftTile > currentLayer || cornerTopLeft > currentLayer && cornerBottomLeft > currentLayer) && topTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Left];
 
       else if (currentLayer > Layer.Ground0 && (topTile < currentLayer || cornerTopLeft < currentLayer && cornerTopRight < currentLayer) && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Top];
       else if (currentLayer > Layer.Ground0 && (rightTile < currentLayer || cornerTopRight < currentLayer && cornerBottomRight < currentLayer) && leftTile == currentLayer && topTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.Right];
@@ -479,6 +467,8 @@ namespace pokemongenerator
       else if (currentLayer > Layer.Ground0 && cornerBottomLeft < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.CornerBottomLeft];
       else if (currentLayer > Layer.Ground0 && cornerBottomRight < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return layerTiles[currentLayer][TilePosition.CornerBottomRight];
       
+      else if (topTile <= currentLayer && leftTile <= currentLayer && rightTile <= currentLayer && rightTile <= currentLayer) return layerTiles[currentLayer][TilePosition.Center];
+
       else return layerTiles[currentLayer+1][TilePosition.Center];
     }
   }
