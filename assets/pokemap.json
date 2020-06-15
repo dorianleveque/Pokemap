@@ -6,6 +6,6 @@
     "backtrack" :"true",
     "model": {
         "type": "overlapping",
-        "n": 3
+        "n": 4
     }
 }

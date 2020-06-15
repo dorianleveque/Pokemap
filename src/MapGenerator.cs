@@ -155,8 +155,12 @@ namespace pokemongenerator
       AddCenters();
       AddHouses(generator.houseNum);
       AddPath();
+<<<<<<< HEAD
+      //AddDecorations();
+=======
       AddTrees();
       AddDecorations();
+>>>>>>> 02940bf384ec199564482dea435553168fecaaee
     }
 
     private void AddTrees()
