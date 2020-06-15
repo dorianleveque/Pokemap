@@ -408,12 +408,12 @@ namespace pokemongenerator
                   temp_map[temp_y][temp_x] = new Node(new System.Numerics.Vector2(temp_x,temp_y),true, 1) ;
 
                   if (GetTileId(temp_x,temp_y) == 33){
-                    SetTile(temp_x,temp_y,163);
+                    SetTile(temp_x,temp_y,164);
                     SetTile(temp_x,temp_y-1,143);
                     SetTile(temp_x,temp_y+1,185);
                   }
                   else if (GetTileId(temp_x,temp_y) == 35){
-                    SetTile(temp_x,temp_y,164);
+                    SetTile(temp_x,temp_y,165);
                     SetTile(temp_x,temp_y-1,144);
                     SetTile(temp_x,temp_y+1,186);
                     
@@ -432,6 +432,12 @@ namespace pokemongenerator
                   }
                   else if (GetTileId(temp_x,temp_y) == 165){
                     SetTile(temp_x,temp_y,165);
+                  }
+                  //sable
+                  else if (GetTileId(temp_x,temp_y) == 72 || GetTileId(temp_x,temp_y) == 73 || GetTileId(temp_x,temp_y) == 74 
+                   || GetTileId(temp_x,temp_y) == 93 || GetTileId(temp_x,temp_y) == 94 || GetTileId(temp_x,temp_y) == 95 
+                   || GetTileId(temp_x,temp_y) == 114 || GetTileId(temp_x,temp_y) == 115 || GetTileId(temp_x,temp_y) == 116  ){
+                  //do nothing
                   }
                   else {
                     SetTile(temp_x,temp_y,89);
