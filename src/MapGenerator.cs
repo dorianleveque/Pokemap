@@ -34,9 +34,9 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
-      //Map.savePicture();
-      //Map.processPicture();
-      //Map.convertPicture();
+      Map.savePicture();
+      Map.processPicture();
+      Map.convertPicture();
     }
   }
 
@@ -50,7 +50,7 @@ namespace pokemongenerator
   {
     private FastNoise n;
     private enum Layer { DeepOcean, Ocean, Beach, Ground0, Ground1, Ground2, Ground3 };
-    private enum TileType { DeepOcean, Ocean, Beach, Ground, GroundPath };
+    private enum TileType { DeepOcean, Ocean, Beach, Ground, GroundPath, ForestTree };
     private enum TilePosition { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight, CornerTopLeft, CornerTopRight, CornerBottomLeft, CornerBottomRight };
     private Dictionary<TileType, Dictionary<TilePosition, int>> tiles = new Dictionary<TileType, Dictionary<TilePosition, int>>();
     private List<Vector2> doorSteps = new List<Vector2>();
@@ -62,6 +62,7 @@ namespace pokemongenerator
       Dictionary<TilePosition, int> TilesBeach = new Dictionary<TilePosition, int>();
       Dictionary<TilePosition, int> TilesGround = new Dictionary<TilePosition, int>();
       Dictionary<TilePosition, int> TilesPath = new Dictionary<TilePosition, int>();
+      Dictionary<TilePosition, int> TilesTree = new Dictionary<TilePosition, int>();
 
       TilesDeepOcean.Add(TilePosition.TopLeft, 9);
       TilesDeepOcean.Add(TilePosition.Top, 10);
@@ -137,6 +138,17 @@ namespace pokemongenerator
       TilesPath.Add(TilePosition.CornerBottomLeft, 87);
       TilesPath.Add(TilePosition.CornerBottomRight, 86);
       tiles.Add(TileType.GroundPath, TilesPath);
+
+      TilesTree.Add(TilePosition.TopLeft, 15);
+      TilesTree.Add(TilePosition.Top, 36);
+      TilesTree.Add(TilePosition.TopRight, 37);
+      TilesTree.Add(TilePosition.Left, 57);
+      TilesTree.Add(TilePosition.Center, 58);
+      TilesTree.Add(TilePosition.Right, 78);
+      TilesTree.Add(TilePosition.BottomLeft, 79);
+      TilesTree.Add(TilePosition.Bottom, 99);
+      TilesTree.Add(TilePosition.BottomRight, 100);
+      tiles.Add(TileType.ForestTree, TilesTree);
     }
     public override void run()
     {
@@ -155,12 +167,8 @@ namespace pokemongenerator
       AddCenters();
       AddHouses(generator.houseNum);
       AddPath();
-<<<<<<< HEAD
-      //AddDecorations();
-=======
       AddTrees();
       AddDecorations();
->>>>>>> 02940bf384ec199564482dea435553168fecaaee
     }
 
     private void AddTrees()
@@ -240,6 +248,12 @@ namespace pokemongenerator
               if (searchTileAround(x, y, tiles[TileType.Beach], 3) && r.NextDouble() >= 0.95) SetTile(x, y, 25); // sand dust
               if (!searchTileAround(x, y, tiles[TileType.GroundPath], 8) && r.NextDouble() >= 0.90) SetTile(x, y, 2); // tall grass
               if (GetTileId(x, y + 1) == tiles[TileType.GroundPath][TilePosition.Top] && r.NextDouble() >= 0.92) SetTile(x, y, 44); // sign
+              if (searchTileAround(x, y, tiles[TileType.ForestTree], 3) && r.NextDouble() >= 0.99) SetTile(x, y, 117); // strain
+              if (searchTileAround(x, y, tiles[TileType.ForestTree], 3) && r.NextDouble() >= 0.99 && x%2==0)
+              {
+                SetTile(x, y, 166);
+                SetTile(x+1, y, 167);
+              }
               if (r.NextDouble() >= 0.98) SetTile(x, y, r.Next(3, 6)); // flowers
               if (r.NextDouble() >= 0.9995) SetTile(x, y, 46); // pokeball
               break;
@@ -346,8 +360,6 @@ namespace pokemongenerator
       doorSteps.Add(step);
       SetTile((int)step.X, (int)step.Y, 89);
       SetTile((int)step.X, (int)step.Y - 1, 89);
-
-
       return true; // if it's impossible to put house
     }
 
@@ -388,9 +400,7 @@ namespace pokemongenerator
                 centers.Add(center);
               }
             }
-
           }
-
         });
       });
     }
