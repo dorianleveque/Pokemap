@@ -123,19 +123,19 @@ namespace pokemongenerator
       TilesGround.Add(TilePosition.CornerBottomRight, 75);
       tiles.Add(TileType.Ground, TilesGround);
 
-      TilesPath.Add(TilePosition.TopLeft, 12);
-      TilesPath.Add(TilePosition.Top, 13);
-      TilesPath.Add(TilePosition.TopRight, 14);
-      TilesPath.Add(TilePosition.Left, 33);
-      TilesPath.Add(TilePosition.Center, 34);
-      TilesPath.Add(TilePosition.Right, 35);
-      TilesPath.Add(TilePosition.BottomLeft, 54);
-      TilesPath.Add(TilePosition.Bottom, 55);
-      TilesPath.Add(TilePosition.BottomRight, 56);
-      TilesPath.Add(TilePosition.CornerTopLeft, 97);
-      TilesPath.Add(TilePosition.CornerTopRight, 96);
-      TilesPath.Add(TilePosition.CornerBottomLeft, 76);
-      TilesPath.Add(TilePosition.CornerBottomRight, 75);
+      TilesPath.Add(TilePosition.TopLeft, 67);
+      TilesPath.Add(TilePosition.Top, 68);
+      TilesPath.Add(TilePosition.TopRight, 69);
+      TilesPath.Add(TilePosition.Left, 88);
+      TilesPath.Add(TilePosition.Center, 89);
+      TilesPath.Add(TilePosition.Right, 90);
+      TilesPath.Add(TilePosition.BottomLeft, 109);
+      TilesPath.Add(TilePosition.Bottom, 110);
+      TilesPath.Add(TilePosition.BottomRight, 111);
+      TilesPath.Add(TilePosition.CornerTopLeft, 108);
+      TilesPath.Add(TilePosition.CornerTopRight, 107);
+      TilesPath.Add(TilePosition.CornerBottomLeft, 87);
+      TilesPath.Add(TilePosition.CornerBottomRight, 86);
       tiles.Add(TileType.GroundPath, TilesPath);
     }
     public override void run()
@@ -170,17 +170,17 @@ namespace pokemongenerator
           switch (GetTileId(x, y))
           {
             case 94: // sand
-              if (searchTileAround(x, y, GetTiles(Layer.Ocean), 3) && r.NextDouble() >= 0.99) SetTile(x, y, 113); // shell
-              if (searchTileAround(x, y, GetTiles(Layer.Ground0), 3) && r.NextDouble() >= 0.90) SetTile(x, y, 26); // dune grass
-              //if (searchTileAround(x, y, GetTiles(Layer.Ground0], 3) && r.NextDouble() >= 0.95) SetTile(x, y, 45); // sign
+              if (searchTileAround(x, y, tiles[TileType.Ocean], 3) && r.NextDouble() >= 0.99) SetTile(x, y, 113); // shell
+              if (searchTileAround(x, y, tiles[TileType.Ground], 3) && r.NextDouble() >= 0.90) SetTile(x, y, 26); // dune grass
               if (r.NextDouble() >= 0.995) SetTile(x, y, 47); // pokeball
               break;
             case 34: // grass
-              if (searchTileAround(x, y, GetTiles(Layer.Beach), 3) && r.NextDouble() >= 0.95) SetTile(x, y, 25); // sand dust
-              if (searchTileAround(x, y, GetTiles(Layer.Beach), 3) && r.NextDouble() >= 0.95) SetTile(x, y, 25); // tall grass
-              //if (searchTileAround(x, y, GetTiles(Layer.Ground0), 3) && r.NextDouble() >= 0.95) SetTile(x, y, 45); // sign
+              if (searchTileAround(x, y, tiles[TileType.Beach], 3) && r.NextDouble() >= 0.95) SetTile(x, y, 25); // sand dust
+              if (!searchTileAround(x, y, tiles[TileType.GroundPath], 8) && r.NextDouble() >= 0.90) SetTile(x, y, 2); // tall grass
+              if (GetTileId(x, y + 1) == tiles[TileType.GroundPath][TilePosition.Top] && r.NextDouble() >= 0.92) SetTile(x, y, 44); // sign
+              if (r.NextDouble() >= 0.98) SetTile(x, y, r.Next(3, 6)); // flowers
               if (r.NextDouble() >= 0.999) SetTile(x, y, 46); // pokeball
-            break;
+              break;
           }
         });
       });
@@ -188,21 +188,13 @@ namespace pokemongenerator
 
     private bool searchTileAround(int x, int y, Dictionary<TilePosition, int> tiles, int radius)
     {
-      int topTile;
-      int bottomTile;
-      int leftTile;
-      int rightTile;
       List<int> tileIdList = tiles.Values.ToList();
-
-      tileIdList.Add(tiles[TilePosition.Top]);
-
       for (int r = 0; r < radius; r++)
       {
-        topTile = GetTileId(x, y-r);
-        bottomTile = GetTileId(x, y+r);
-        leftTile = GetTileId(x-r, y);
-        rightTile = GetTileId(x+r, y);
-        if (tileIdList.Contains(topTile) || tileIdList.Contains(bottomTile) || tileIdList.Contains(leftTile) || tileIdList.Contains(rightTile)) return true;
+        if (tileIdList.Contains(GetTileId(x - r, y - r)) || tileIdList.Contains(GetTileId(x, y - r)) || tileIdList.Contains(GetTileId(x + r, y - r)) ||
+            tileIdList.Contains(GetTileId(x - r, y)) || tileIdList.Contains(GetTileId(x + r, y)) ||
+            tileIdList.Contains(GetTileId(x - r, y + r)) || tileIdList.Contains(GetTileId(x, y + r)) || tileIdList.Contains(GetTileId(x + r, y + r))
+            ) return true;
       }
       return false;
     }
@@ -527,7 +519,8 @@ namespace pokemongenerator
 
     private Dictionary<TilePosition, int> GetTiles(Layer layer)
     {
-      switch(layer) {
+      switch (layer)
+      {
         case Layer.DeepOcean: return tiles[TileType.DeepOcean];
         case Layer.Ocean: return tiles[TileType.Ocean];
         case Layer.Beach: return tiles[TileType.Beach];
