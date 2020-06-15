@@ -424,6 +424,15 @@ namespace pokemongenerator
                     SetTile(temp_x+1,temp_y,126);
                     
                   }
+                   else if (GetTileId(temp_x,temp_y) == 125){
+                    SetTile(temp_x,temp_y,125);
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 164){
+                    SetTile(temp_x,temp_y,164); 
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 165){
+                    SetTile(temp_x,temp_y,165);
+                  }
                   else {
                     SetTile(temp_x,temp_y,89);
                   }
@@ -436,7 +445,33 @@ namespace pokemongenerator
               }
         }
       
+      //add corners
+      generator.Map.lines.ForEach((line) =>
+      {
+        int y = generator.Map.lines.IndexOf(line);
+        line.tiles.ForEach((tile) =>
+        {
+          int x = line.tiles.IndexOf(tile);
+          if (GetTileId(x, y) == 89)
+          {
+            if (GetTileId(x-1, y -1) == 34 && GetTileId(x, y -1) == 89 && GetTileId(x-1, y) == 89 ){
+              SetTile(x-1, y - 1, 108);
+            }
+            if (GetTileId(x+1, y -1) == 34 && GetTileId(x, y -1) == 89 && GetTileId(x+1, y) == 89 ){
+              SetTile(x+1, y - 1, 107);
+            }
+            if (GetTileId(x-1, y +1) == 34 && GetTileId(x, y +1) == 89 && GetTileId(x-1, y) == 89 ){
+              SetTile(x-1, y + 1, 87);
+            }
+            if (GetTileId(x+1, y +1) == 34 && GetTileId(x, y +1) == 89 && GetTileId(x+1, y) == 89 ){
+              SetTile(x+1, y + 1, 86);
+            }
 
+
+          }
+        });
+      });
+      //Add border
       generator.Map.lines.ForEach((line) =>
       {
         int y = generator.Map.lines.IndexOf(line);
@@ -461,6 +496,8 @@ namespace pokemongenerator
             {
               SetTile(x, y - 1, 68);
             }
+
+
           }
         });
       });
