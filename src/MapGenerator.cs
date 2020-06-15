@@ -34,9 +34,9 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
-      // Map.savePicture();
-      // Map.processPicture();
-      // Map.convertPicture();
+      Map.savePicture();
+      Map.processPicture();
+      Map.convertPicture();
     }
   }
 
@@ -402,114 +402,140 @@ namespace pokemongenerator
         {
           int x = line.tiles.IndexOf(tile);
           //if it's a cliff side :
-          if (GetTileId(x, y) == 55 && GetTileId(x - 1, y) == 55 && GetTileId(x + 1, y) == 55)
-          {
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true, 3));
+          if (GetTileId(x,y) == 55 && GetTileId(x-1,y) == 55 &&  GetTileId(x+1,y) == 55 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
-          else if (GetTileId(x, y) == 33 && GetTileId(x, y - 1) == 33 && GetTileId(x, y + 1) == 33)
-          {
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true, 3));
+          else if (GetTileId(x,y) == 33 && GetTileId(x,y-1) == 33 &&  GetTileId(x,y+1) == 33 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
-          else if (GetTileId(x, y) == 35 && GetTileId(x, y - 1) == 35 && GetTileId(x, y + 1) == 35)
-          {
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true, 3));
+          else if (GetTileId(x,y) == 35 && GetTileId(x,y-1) == 35 &&  GetTileId(x,y+1) == 35 ){
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,5));
           }
 
           //if it's grass or path :
-          else if (GetTileId(x, y) == 89 || GetTileId(x, y) == 34)
-          {
-            if ((GetTileId(x - 1, y) == 89 || GetTileId(x - 1, y) == 34) && (GetTileId(x + 1, y) == 89 || GetTileId(x + 1, y) == 34)
-             || (GetTileId(x, y - 1) == 89 || GetTileId(x, y - 1) == 34) && (GetTileId(x, y + 1) == 89 || GetTileId(x, y + 1) == 34))
-            {
-              temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true));
-            }
+          else if (GetTileId(x,y) == 89 || GetTileId(x,y) == 34  ){
+              if ((GetTileId(x-1,y) == 89 || GetTileId(x-1,y) == 34) && (GetTileId(x+1,y) == 89 || GetTileId(x+1,y) == 34)
+               || (GetTileId(x,y-1) == 89 || GetTileId(x,y-1) == 34) && (GetTileId(x,y+1) == 89 || GetTileId(x,y+1) == 34)  ){
+                  temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,3));
+               }  
 
-            else
-            {
-              temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true, 10));
-            }
+               else {
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,20));
+               }
           }
           //if it's sand :
-          else if (GetTileId(x, y) == 72 || GetTileId(x, y) == 73 || GetTileId(x, y) == 74 || GetTileId(x, y) == 93 || GetTileId(x, y) == 94
-          || GetTileId(x, y) == 95 || GetTileId(x, y) == 114 || GetTileId(x, y) == 114 || GetTileId(x, y) == 115)
-          {
-            temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), true, 2));
-
+          else if (GetTileId(x,y) == 72 || GetTileId(x,y) == 73 || GetTileId(x,y) == 74 || GetTileId(x,y) == 93 || GetTileId(x,y) == 94
+          || GetTileId(x,y) == 95 || GetTileId(x,y) == 114 || GetTileId(x,y) == 114 || GetTileId(x,y) == 115 ){
+                 temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),true,4));
+            
 
           }
           else
           {
             temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), false));
           }
-        });
-      });
-      foreach (var coord in doorSteps)
-      {
-        temp_map[(int)coord.Y + 1][(int)coord.X] = new Node(new System.Numerics.Vector2((int)coord.Y + 1, (int)coord.X), true, 0);
-      }
-
+        });});
+        foreach (var coord in doorSteps){
+          temp_map[(int)coord.Y+1][(int)coord.X] = new Node(new System.Numerics.Vector2((int)coord.Y+1,(int)coord.X),true, 1) ;
+        }
+   
       Astar astar = new Astar(temp_map);
 
+        foreach (var coord in doorSteps){
+                var cur_x = coord.X;
+                var cur_y = coord.Y;
+                var moy_x = 0;
+                var moy_y = 0;
+                var dist = 10000000.0;
+                // find closest center
+              foreach (var coord_moy in centers){
+                if (((cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.Y)*(cur_y-coord_moy.Y)) < dist )
+                {
+                  moy_x = (int)coord_moy.X;
+                  moy_y = (int)coord_moy.Y;
+                  dist = (cur_x-coord_moy.X)*(cur_x-coord_moy.X)+(cur_y-coord_moy.Y)*(cur_y-coord_moy.Y);
+                }
+              }
+              // find paths between targer 
+              var path = astar.FindPath(new Vector2(cur_x,cur_y), new Vector2(moy_x,moy_y));
+              try {
+                foreach (Node node in path)
+                {
+                  var temp_x = (int)node.Position.X;
+                  var temp_y = (int)node.Position.Y;
+                  temp_map[temp_y][temp_x] = new Node(new System.Numerics.Vector2(temp_x,temp_y),true, 1) ;
 
-      foreach (var coord in doorSteps)
+                  if (GetTileId(temp_x,temp_y) == 33){
+                    SetTile(temp_x,temp_y,164);
+                    SetTile(temp_x,temp_y-1,143);
+                    SetTile(temp_x,temp_y+1,185);
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 35){
+                    SetTile(temp_x,temp_y,165);
+                    SetTile(temp_x,temp_y-1,144);
+                    SetTile(temp_x,temp_y+1,186);
+                    
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 55){
+                    SetTile(temp_x,temp_y,125);
+                    SetTile(temp_x-1,temp_y,124);
+                    SetTile(temp_x+1,temp_y,126);
+                    
+                  }
+                   else if (GetTileId(temp_x,temp_y) == 125){
+                    SetTile(temp_x,temp_y,125);
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 164){
+                    SetTile(temp_x,temp_y,164); 
+                  }
+                  else if (GetTileId(temp_x,temp_y) == 165){
+                    SetTile(temp_x,temp_y,165);
+                  }
+                  //sable
+                  else if (GetTileId(temp_x,temp_y) == 72 || GetTileId(temp_x,temp_y) == 73 || GetTileId(temp_x,temp_y) == 74 
+                   || GetTileId(temp_x,temp_y) == 93 || GetTileId(temp_x,temp_y) == 94 || GetTileId(temp_x,temp_y) == 95 
+                   || GetTileId(temp_x,temp_y) == 114 || GetTileId(temp_x,temp_y) == 115 || GetTileId(temp_x,temp_y) == 116  ){
+                  //do nothing
+                  }
+                  else {
+                    SetTile(temp_x,temp_y,89);
+                  }
+                  
+                }
+                astar = new Astar(temp_map);
+              }
+              catch (Exception e){
+                Console.Write("No path availible for one the house ");
+              }
+        }
+      
+      //add corners
+      generator.Map.lines.ForEach((line) =>
       {
-        var cur_x = coord.X;
-        var cur_y = coord.Y;
-        var moy_x = 0;
-        var moy_y = 0;
-        var dist = 10000000.0;
-        // find closest center
-        foreach (var coord_moy in centers)
+        int y = generator.Map.lines.IndexOf(line);
+        line.tiles.ForEach((tile) =>
         {
-          if (((cur_x - coord_moy.X) * (cur_x - coord_moy.X) + (cur_y - coord_moy.Y) * (cur_y - coord_moy.Y)) < dist)
+          int x = line.tiles.IndexOf(tile);
+          if (GetTileId(x, y) == 89)
           {
-            moy_x = (int)coord_moy.X;
-            moy_y = (int)coord_moy.Y;
-            dist = (cur_x - coord_moy.X) * (cur_x - coord_moy.X) + (cur_y - coord_moy.Y) * (cur_y - coord_moy.Y);
-          }
-        }
-        // find paths between targer 
-        var path = astar.FindPath(new Vector2(cur_x, cur_y), new Vector2(moy_x, moy_y));
-        try
-        {
-          foreach (Node node in path)
-          {
-            var temp_x = (int)node.Position.X;
-            var temp_y = (int)node.Position.Y;
-            if (GetTileId(temp_x, temp_y) == 33)
-            {
-              SetTile(temp_x, temp_y, 163);
-              SetTile(temp_x, temp_y - 1, 143);
-              SetTile(temp_x, temp_y + 1, 185);
+            if (GetTileId(x-1, y -1) == 34 && GetTileId(x, y -1) == 89 && GetTileId(x-1, y) == 89 ){
+              SetTile(x-1, y - 1, 108);
             }
-            else if (GetTileId(temp_x, temp_y) == 35)
-            {
-              SetTile(temp_x, temp_y, 164);
-              SetTile(temp_x, temp_y - 1, 144);
-              SetTile(temp_x, temp_y + 1, 186);
+            if (GetTileId(x+1, y -1) == 34 && GetTileId(x, y -1) == 89 && GetTileId(x+1, y) == 89 ){
+              SetTile(x+1, y - 1, 107);
+            }
+            if (GetTileId(x-1, y +1) == 34 && GetTileId(x, y +1) == 89 && GetTileId(x-1, y) == 89 ){
+              SetTile(x-1, y + 1, 87);
+            }
+            if (GetTileId(x+1, y +1) == 34 && GetTileId(x, y +1) == 89 && GetTileId(x+1, y) == 89 ){
+              SetTile(x+1, y + 1, 86);
+            }
 
-            }
-            else if (GetTileId(temp_x, temp_y) == 55)
-            {
-              SetTile(temp_x, temp_y, 125);
-              SetTile(temp_x - 1, temp_y, 124);
-              SetTile(temp_x + 1, temp_y, 126);
-
-            }
-            else
-            {
-              SetTile(temp_x, temp_y, 89);
-            }
 
           }
-        }
-        catch (Exception e)
-        {
-          Console.Write("No path availible");
-        }
-
-      }
-
+        });
+      });
+      //Add border
       generator.Map.lines.ForEach((line) =>
       {
         int y = generator.Map.lines.IndexOf(line);
@@ -534,6 +560,8 @@ namespace pokemongenerator
             {
               SetTile(x, y - 1, 68);
             }
+
+
           }
         });
       });

@@ -118,6 +118,20 @@ namespace tiled
   public void convertPicture(){
     Console.WriteLine("Converting generated bitmap to tmx");
     Bitmap img = new Bitmap("assets/wfc-generated.png");
+
+    lines = new List<TiledLine>() ;
+    // reset lines to 0
+        for (int h = 0; h < 200; h++)
+      {
+        TiledLine line = new TiledLine();
+        for (int w = 0; w < 200; w++)
+        {
+          line.add(0);
+        }
+        lines.Add(line);
+      }
+
+
     for (int i = 0; i < img.Width; i++)
     {
         for (int j = 0; j < img.Height; j++)
@@ -150,8 +164,8 @@ namespace tiled
           new XAttribute("tiledversion", "1.3.4"),
           new XAttribute("orientation", "orthogonal"),
           new XAttribute("renderorder", "left-down"),
-          new XAttribute("width", this.width),
-          new XAttribute("height", this.height),
+          new XAttribute("width", 200),
+          new XAttribute("height", 200),
           new XAttribute("tilewidth", 16),
           new XAttribute("tileheight", 16),
           new XAttribute("infinite", 0),
@@ -164,8 +178,8 @@ namespace tiled
           ),
           new XElement("layer",
             new XAttribute("name", "ground"),
-            new XAttribute("width", this.width),
-            new XAttribute("height", this.height),
+            new XAttribute("width", 200),
+            new XAttribute("height", 200),
             new XElement("data",
               new XAttribute("encoding", "csv"),
               this.ToString()
