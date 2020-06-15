@@ -43,8 +43,8 @@ namespace pokemongenerator
     private void Generate()
     {
       // TODO
-      MapGenerator g = new MapGenerator(width, height,houseNum);
-      g.AddStep(new TerrainGenerator(seed));
+      MapGenerator g = new MapGenerator(width, height,houseNum,seed);
+      g.AddStep(new TerrainGenerator());
       g.Generate();
     }
   }

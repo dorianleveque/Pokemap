@@ -14,11 +14,13 @@ namespace pokemongenerator
     public readonly List<GenerationStep> Steps = new List<GenerationStep>();
     public TiledMap Map;
     public int houseNum;
+    public int seed { get; private set; }
 
-    public MapGenerator(int width, int height, int houseNum)
+    public MapGenerator(int width, int height, int houseNum, int seed)
     {
       Map = new TiledMap(width, height, "Terrain.tsx");
       this.houseNum = houseNum;
+      this.seed = seed;
     }
     public void AddStep(GenerationStep step)
     {
@@ -48,18 +50,18 @@ namespace pokemongenerator
   {
     private FastNoise n;
     private enum Layer { DeepOcean, Ocean, Beach, Ground0, Ground1, Ground2, Ground3 };
+    private enum TileType { DeepOcean, Ocean, Beach, Ground, GroundPath };
     private enum TilePosition { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight, CornerTopLeft, CornerTopRight, CornerBottomLeft, CornerBottomRight };
-    private Dictionary<TilePosition, int> TilesDeepOcean = new Dictionary<TilePosition, int>();
-    private Dictionary<TilePosition, int> TilesOcean = new Dictionary<TilePosition, int>();
-    private Dictionary<TilePosition, int> TilesBeach = new Dictionary<TilePosition, int>();
-    private Dictionary<TilePosition, int> TilesGround = new Dictionary<TilePosition, int>();
+    private Dictionary<TileType, Dictionary<TilePosition, int>> tiles = new Dictionary<TileType, Dictionary<TilePosition, int>>();
     private List<Vector2> doorSteps = new List<Vector2>();
     private List<Vector2> centers = new List<Vector2>();
-    public TerrainGenerator(int seed)
+    public TerrainGenerator()
     {
-      n = new FastNoise(seed);
-      n.SetNoiseType(FastNoise.NoiseType.Perlin);
-      n.SetFrequency(0.02f);
+      Dictionary<TilePosition, int> TilesDeepOcean = new Dictionary<TilePosition, int>();
+      Dictionary<TilePosition, int> TilesOcean = new Dictionary<TilePosition, int>();
+      Dictionary<TilePosition, int> TilesBeach = new Dictionary<TilePosition, int>();
+      Dictionary<TilePosition, int> TilesGround = new Dictionary<TilePosition, int>();
+      Dictionary<TilePosition, int> TilesPath = new Dictionary<TilePosition, int>();
 
       TilesDeepOcean.Add(TilePosition.TopLeft, 9);
       TilesDeepOcean.Add(TilePosition.Top, 10);
@@ -74,6 +76,8 @@ namespace pokemongenerator
       TilesDeepOcean.Add(TilePosition.CornerTopRight, 31);
       TilesDeepOcean.Add(TilePosition.CornerBottomLeft, 31);
       TilesDeepOcean.Add(TilePosition.CornerBottomRight, 31);
+      tiles.Add(TileType.DeepOcean, TilesDeepOcean);
+
       TilesOcean.Add(TilePosition.TopLeft, 6);
       TilesOcean.Add(TilePosition.Top, 7);
       TilesOcean.Add(TilePosition.TopRight, 8);
@@ -87,6 +91,8 @@ namespace pokemongenerator
       TilesOcean.Add(TilePosition.CornerTopRight, 91);
       TilesOcean.Add(TilePosition.CornerBottomLeft, 71);
       TilesOcean.Add(TilePosition.CornerBottomRight, 70);
+      tiles.Add(TileType.Ocean, TilesOcean);
+
       TilesBeach.Add(TilePosition.TopLeft, 72);
       TilesBeach.Add(TilePosition.Top, 73);
       TilesBeach.Add(TilePosition.TopRight, 74);
@@ -100,6 +106,8 @@ namespace pokemongenerator
       TilesBeach.Add(TilePosition.CornerTopRight, 215);
       TilesBeach.Add(TilePosition.CornerBottomLeft, 195);
       TilesBeach.Add(TilePosition.CornerBottomRight, 194);
+      tiles.Add(TileType.Beach, TilesBeach);
+
       TilesGround.Add(TilePosition.TopLeft, 12);
       TilesGround.Add(TilePosition.Top, 13);
       TilesGround.Add(TilePosition.TopRight, 14);
@@ -113,66 +121,118 @@ namespace pokemongenerator
       TilesGround.Add(TilePosition.CornerTopRight, 96);
       TilesGround.Add(TilePosition.CornerBottomLeft, 76);
       TilesGround.Add(TilePosition.CornerBottomRight, 75);
+      tiles.Add(TileType.Ground, TilesGround);
 
+      TilesPath.Add(TilePosition.TopLeft, 67);
+      TilesPath.Add(TilePosition.Top, 68);
+      TilesPath.Add(TilePosition.TopRight, 69);
+      TilesPath.Add(TilePosition.Left, 88);
+      TilesPath.Add(TilePosition.Center, 89);
+      TilesPath.Add(TilePosition.Right, 90);
+      TilesPath.Add(TilePosition.BottomLeft, 109);
+      TilesPath.Add(TilePosition.Bottom, 110);
+      TilesPath.Add(TilePosition.BottomRight, 111);
+      TilesPath.Add(TilePosition.CornerTopLeft, 108);
+      TilesPath.Add(TilePosition.CornerTopRight, 107);
+      TilesPath.Add(TilePosition.CornerBottomLeft, 87);
+      TilesPath.Add(TilePosition.CornerBottomRight, 86);
+      tiles.Add(TileType.GroundPath, TilesPath);
     }
     public override void run()
     {
+      n = new FastNoise(generator.seed);
+      n.SetNoiseType(FastNoise.NoiseType.Value);
+      n.SetFrequency(0.02f);
       generator.Map.lines.ForEach((line) =>
       {
         float y = (float)generator.Map.lines.IndexOf(line);
         line.tiles.ForEach((tile) =>
         {
           float x = (float)line.tiles.IndexOf(tile);
-          switch (GetLayer(x, y))
-          {
-            case Layer.DeepOcean: tile.id = GetCorrectLayerTile(x, y, Layer.DeepOcean, TilesDeepOcean);
-             break;
-            case Layer.Ocean: tile.id = GetCorrectLayerTile(x, y, Layer.Ocean, TilesOcean); break;
-            case Layer.Beach: tile.id = GetCorrectLayerTile(x, y, Layer.Beach, TilesBeach); break;
-            case Layer.Ground0: tile.id = GetCorrectLayerTile(x, y, Layer.Ground0, TilesGround); break;
-            case Layer.Ground1: tile.id = GetCorrectLayerTile(x, y, Layer.Ground1, TilesGround); break;
-            case Layer.Ground2: tile.id = GetCorrectLayerTile(x, y, Layer.Ground2, TilesGround); break;
-            case Layer.Ground3: tile.id = GetCorrectLayerTile(x, y, Layer.Ground3, TilesGround); break;
-          }
+          tile.id = GetCorrectLayerTile(x, y);
         });
       });
       AddCenters();
       AddHouses(generator.houseNum);
       AddPath();
+      AddDecorations();
+    }
+
+    private void AddDecorations()
+    {
+      Random r = new Random(generator.seed);
+      generator.Map.lines.ForEach((line) =>
+      {
+        int y = generator.Map.lines.IndexOf(line);
+        line.tiles.ForEach((tile) =>
+        {
+          int x = line.tiles.IndexOf(tile);
+          switch (GetTileId(x, y))
+          {
+            case 94: // sand
+              if (searchTileAround(x, y, tiles[TileType.Ocean], 3) && r.NextDouble() >= 0.99) SetTile(x, y, 113); // shell
+              if (searchTileAround(x, y, tiles[TileType.Ground], 3) && r.NextDouble() >= 0.90) SetTile(x, y, 26); // dune grass
+              if (r.NextDouble() >= 0.995) SetTile(x, y, 47); // pokeball
+              break;
+            case 34: // grass
+              if (searchTileAround(x, y, tiles[TileType.Beach], 3) && r.NextDouble() >= 0.95) SetTile(x, y, 25); // sand dust
+              if (!searchTileAround(x, y, tiles[TileType.GroundPath], 8) && r.NextDouble() >= 0.90) SetTile(x, y, 2); // tall grass
+              if (GetTileId(x, y + 1) == tiles[TileType.GroundPath][TilePosition.Top] && r.NextDouble() >= 0.92) SetTile(x, y, 44); // sign
+              if (r.NextDouble() >= 0.98) SetTile(x, y, r.Next(3, 6)); // flowers
+              if (r.NextDouble() >= 0.999) SetTile(x, y, 46); // pokeball
+              break;
+          }
+        });
+      });
+    }
+
+    private bool searchTileAround(int x, int y, Dictionary<TilePosition, int> tiles, int radius)
+    {
+      List<int> tileIdList = tiles.Values.ToList();
+      for (int r = 0; r < radius; r++)
+      {
+        if (tileIdList.Contains(GetTileId(x - r, y - r)) || tileIdList.Contains(GetTileId(x, y - r)) || tileIdList.Contains(GetTileId(x + r, y - r)) ||
+            tileIdList.Contains(GetTileId(x - r, y)) || tileIdList.Contains(GetTileId(x + r, y)) ||
+            tileIdList.Contains(GetTileId(x - r, y + r)) || tileIdList.Contains(GetTileId(x, y + r)) || tileIdList.Contains(GetTileId(x + r, y + r))
+            ) return true;
+      }
+      return false;
     }
 
     private void AddHouses(int number)
     {
-      Random r = new Random();
-      int count  = 0 ;
+      Random r = new Random(generator.seed);
+      int count = 0;
       int x;
       int y;
       int categorie = 0;
-      int height = generator.Map.lines.Count ;
+      int height = generator.Map.lines.Count;
       int width = generator.Map.lines[0].tiles.Count;
 
-      y = r.Next(1,height);
+      y = r.Next(1, height);
       var i = 0;
-      while (count < number )
+      while (count < number)
       {
-        if (i > 20){
-            y = r.Next(1,height);
-            i = 0;
+        if (i > 20)
+        {
+          y = r.Next(1, height);
+          i = 0;
 
         }
-        x = r.Next(1,width);
-        categorie = r.Next(1,6);
-        if (AddHouse(x,y,categorie) == true ){
-          count += 1 ;
-          i=0;
+        x = r.Next(1, width);
+        categorie = r.Next(1, 6);
+        if (AddHouse(x, y, categorie) == true)
+        {
+          count += 1;
+          i = 0;
         }
-        i+=1;
-      } 
-        
+        i += 1;
+      }
+
 
     }
 
-    private bool AddHouse(int x, int y , int categorie = 0)
+    private bool AddHouse(int x, int y, int categorie = 0)
     {
       int start_id = 0;
       int column = 0;
@@ -180,53 +240,65 @@ namespace pokemongenerator
       int x_step = 0;
       int y_step = 0;
       //set each type of houses's parameters
-      switch (categorie){ 
-        case 0 : start_id = 147 ; column = 4 ; row= 4 ; y_step = 4 ; x_step = 1 ;  break;
-        case 1 : start_id = 231 ; column = 5 ; row= 5 ; y_step = 5 ; x_step = 2 ; break;
-        case 2 : start_id = 236 ; column = 4 ; row= 5 ; y_step = 5 ; x_step = 1 ;  break;
-        case 3 : start_id = 240 ; column = 7 ; row= 5 ; y_step = 5 ; x_step = 4 ;  break;
-        case 4 : start_id = 132 ; column = 5 ; row= 5 ; y_step = 5 ; x_step = 2 ; break;
-        case 5 : start_id = 16 ; column = 4 ; row= 5 ; y_step = 5 ; x_step = 1 ; break;}
+      switch (categorie)
+      {
+        case 0: start_id = 147; column = 4; row = 4; y_step = 4; x_step = 1; break;
+        case 1: start_id = 231; column = 5; row = 5; y_step = 5; x_step = 2; break;
+        case 2: start_id = 236; column = 4; row = 5; y_step = 5; x_step = 1; break;
+        case 3: start_id = 240; column = 7; row = 5; y_step = 5; x_step = 4; break;
+        case 4: start_id = 132; column = 5; row = 5; y_step = 5; x_step = 2; break;
+        case 5: start_id = 16; column = 4; row = 5; y_step = 5; x_step = 1; break;
+      }
 
-      try {
-          // check if it's on grass
-        for (int i = 0; i < row+4 ; i++){
-          for (int j = 0; j < column ; j++) {
-            if (GetTileId(x+j,y-2+i) != 34) {
+      try
+      {
+        // check if it's on grass
+        for (int i = 0; i < row + 4; i++)
+        {
+          for (int j = 0; j < column; j++)
+          {
+            if (GetTileId(x + j, y - 2 + i) != 34)
+            {
               return false;
-            } 
-          }}
-          // place les blocs de maison
-        for (int i = 0; i < row ; i++){
-          for (int j = 0; j < column ; j++) {
-            SetTile(x+j,y+i,start_id + j + i*21+1);
-          }}
+            }
+          }
+        }
+        // place les blocs de maison
+        for (int i = 0; i < row; i++)
+        {
+          for (int j = 0; j < column; j++)
+          {
+            SetTile(x + j, y + i, start_id + j + i * 21 + 1);
+          }
+        }
 
       }
-      catch (Exception e){
+      catch (Exception e)
+      {
         return false;
       }
-     
+
       var step = new Vector2();
-      step.X=x+x_step;
-      step.Y=y+y_step+1;
+      step.X = x + x_step;
+      step.Y = y + y_step + 1;
       doorSteps.Add(step);
-      SetTile((int)step.X,(int)step.Y, 89 );
-      SetTile((int)step.X,(int)step.Y-1, 89 );
+      SetTile((int)step.X, (int)step.Y, 89);
+      SetTile((int)step.X, (int)step.Y - 1, 89);
 
 
       return true; // if it's impossible to put house
     }
 
 
-    private void AddCenters(){
-      
+    private void AddCenters()
+    {
+
       float value;
       float value_top;
       float value_bottom;
       float value_right;
       float value_left;
-      
+
 
       generator.Map.lines.ForEach((line) =>
       {
@@ -234,29 +306,34 @@ namespace pokemongenerator
         line.tiles.ForEach((tile) =>
         {
           float x = (float)line.tiles.IndexOf(tile);
-          
+
           value = n.GetNoise(x, y);
-          value_top = n.GetNoise(x, y-1);
-          value_bottom = n.GetNoise(x, y+1);
-          value_right = n.GetNoise(x+1, y);
-          value_left = n.GetNoise(x-1, y);
-          
+          value_top = n.GetNoise(x, y - 1);
+          value_bottom = n.GetNoise(x, y + 1);
+          value_right = n.GetNoise(x + 1, y);
+          value_left = n.GetNoise(x - 1, y);
+
           if (value > value_bottom && value > value_top && value > value_right && value > value_left)
           {
-            for (int i = 0; i < 5 ; i++){
-            for (int j = 0; j < 5 ; j++) {
-              SetTile((int)x+j,(int)y+i, 89 );
-              var center = new Vector2();
-              center.X= (int)x+j;
-              center.Y= (int)y+i;
-              centers.Add(center);
-            }}
+            for (int i = 0; i < 5; i++)
+            {
+              for (int j = 0; j < 5; j++)
+              {
+                SetTile((int)x + j, (int)y + i, 89);
+                var center = new Vector2();
+                center.X = (int)x + j;
+                center.Y = (int)y + i;
+                centers.Add(center);
+              }
+            }
 
           }
 
-        });});
+        });
+      });
     }
-    private void AddPath(){
+    private void AddPath()
+    {
       // Create map for A* lib
       List<List<Node>> temp_map = new List<List<Node>>();
       generator.Map.lines.ForEach((line) =>
@@ -295,8 +372,9 @@ namespace pokemongenerator
             
 
           }
-          else {
-              temp_map[y].Add(new Node(new System.Numerics.Vector2(x,y),false));
+          else
+          {
+            temp_map[y].Add(new Node(new System.Numerics.Vector2(x, y), false));
           }
         });});
         foreach (var coord in doorSteps){
@@ -304,7 +382,6 @@ namespace pokemongenerator
         }
    
       Astar astar = new Astar(temp_map);
-
 
         foreach (var coord in doorSteps){
                 var cur_x = coord.X;
@@ -357,8 +434,8 @@ namespace pokemongenerator
               catch (Exception e){
                 Console.Write("No path availible for one the house ");
               }
-
-            }
+        }
+      
 
       generator.Map.lines.ForEach((line) =>
       {
@@ -366,41 +443,47 @@ namespace pokemongenerator
         line.tiles.ForEach((tile) =>
         {
           int x = line.tiles.IndexOf(tile);
-          if (GetTileId(x, y) == 89){
-            if (GetTileId(x+1, y) == 34){
-                SetTile(x+1, y,90);
+          if (GetTileId(x, y) == 89)
+          {
+            if (GetTileId(x + 1, y) == 34)
+            {
+              SetTile(x + 1, y, 90);
             }
-            if (GetTileId(x-1, y) == 34){
-                SetTile(x-1, y,88);  
+            if (GetTileId(x - 1, y) == 34)
+            {
+              SetTile(x - 1, y, 88);
             }
-            if (GetTileId(x, y+1) == 34){
-                SetTile(x, y+1,110); 
+            if (GetTileId(x, y + 1) == 34)
+            {
+              SetTile(x, y + 1, 110);
             }
-            if (GetTileId(x, y-1) == 34){
-                SetTile(x, y-1,68); 
+            if (GetTileId(x, y - 1) == 34)
+            {
+              SetTile(x, y - 1, 68);
             }
           }
-        });});
-
-
-
-
+        });
+      });
     }
 
 
 
-    private void SetTile (int x , int y, int id){
-      generator.Map.lines[y].tiles[x].id= id; 
+    private void SetTile(int x, int y, int id)
+    {
+      generator.Map.lines[y].tiles[x].id = id;
     }
 
-    private int GetTileId(int x, int y) {
-      try {
+    private int GetTileId(int x, int y)
+    {
+      try
+      {
         return generator.Map.lines[y].tiles[x].id;
       }
-      catch (Exception e){
+      catch (Exception e)
+      {
         return 0;
       }
-      
+
     }
     /** 
     * Get the layer type for each positions on the map
@@ -409,22 +492,33 @@ namespace pokemongenerator
     {
       switch (n.GetNoise(x, y))
       {
-        case float n when (n < -0.2f): return Layer.DeepOcean;
+        case float n when (n < -0.3f): return Layer.DeepOcean;
         case float n when (n < -0.1f): return Layer.Ocean;
-        case float n when (n < 0.0f): return Layer.Beach;
-        case float n when (n < 0.02f): return Layer.Ground0;
-        case float n when (n < 0.55f): return Layer.Ground1;
-        //case float n when (n < 0.8f): return Layer.Ground2;
-        default: return Layer.Ground1;
+        case float n when (n < 0.10f): return Layer.Beach;
+        case float n when (n < 0.2f): return Layer.Ground0;
+        case float n when (n < 0.8f): return Layer.Ground1;
+        default: return Layer.Ground2;
       }
-      
+
+    }
+
+    private Dictionary<TilePosition, int> GetTiles(Layer layer)
+    {
+      switch (layer)
+      {
+        case Layer.DeepOcean: return tiles[TileType.DeepOcean];
+        case Layer.Ocean: return tiles[TileType.Ocean];
+        case Layer.Beach: return tiles[TileType.Beach];
+        default: return tiles[TileType.Ground];
+      }
     }
 
     /**
     * Get the correct Layer Tile for the connection between each layer type
     */
-    private int GetCorrectLayerTile(float x, float y, Layer mainLayer, Dictionary<TilePosition, int> tilesID)
+    private int GetCorrectLayerTile(float x, float y)
     {
+      Layer currentLayer = GetLayer(x, y);
       Layer cornerTopLeft = GetLayer(x - 1, y - 1);
       Layer cornerTopRight = GetLayer(x + 1, y - 1);
       Layer cornerBottomLeft = GetLayer(x - 1, y + 1);
@@ -434,36 +528,38 @@ namespace pokemongenerator
       Layer bottomTile = GetLayer(x, y + 1);
       Layer leftTile = GetLayer(x - 1, y);
 
-      if (mainLayer < Layer.Ground0 && topTile > mainLayer && leftTile > mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopLeft];
-      else if (mainLayer < Layer.Ground0 && topTile > mainLayer && rightTile > mainLayer && leftTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopRight];
-      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && leftTile > mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomLeft];
-      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && rightTile > mainLayer && leftTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomRight];
-      
-      else if (mainLayer > Layer.Ground0 && topTile < mainLayer && leftTile < mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopLeft];
-      else if (mainLayer > Layer.Ground0 && topTile < mainLayer && rightTile < mainLayer && leftTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.TopRight];
-      else if (mainLayer > Layer.Ground0 && bottomTile < mainLayer && leftTile < mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomLeft];
-      else if (mainLayer > Layer.Ground0 && bottomTile < mainLayer && rightTile < mainLayer && leftTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.BottomRight];
+      if (currentLayer < Layer.Ground0 && topTile > currentLayer && leftTile > currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.TopLeft];
+      else if (currentLayer < Layer.Ground0 && topTile > currentLayer && rightTile > currentLayer && leftTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.TopRight];
+      else if (currentLayer < Layer.Ground0 && bottomTile > currentLayer && leftTile > currentLayer && rightTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.BottomLeft];
+      else if (currentLayer < Layer.Ground0 && bottomTile > currentLayer && rightTile > currentLayer && leftTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.BottomRight];
+      else if (currentLayer > Layer.Ground0 && topTile < currentLayer && leftTile < currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.TopLeft];
+      else if (currentLayer > Layer.Ground0 && topTile < currentLayer && rightTile < currentLayer && leftTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.TopRight];
+      else if (currentLayer > Layer.Ground0 && bottomTile < currentLayer && leftTile < currentLayer && rightTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.BottomLeft];
+      else if (currentLayer > Layer.Ground0 && bottomTile < currentLayer && rightTile < currentLayer && leftTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.BottomRight];
 
-      else if (mainLayer < Layer.Ground0 && topTile > mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Top];
-      else if (mainLayer < Layer.Ground0 && rightTile > mainLayer && leftTile == mainLayer && topTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Right];
-      else if (mainLayer < Layer.Ground0 && bottomTile > mainLayer && leftTile == mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.Bottom];
-      else if (mainLayer < Layer.Ground0 && leftTile > mainLayer && topTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Left];
+      else if (currentLayer < Layer.Ground0 && (topTile > currentLayer || cornerTopLeft > currentLayer && cornerTopRight > currentLayer) && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Top];
+      else if (currentLayer < Layer.Ground0 && (rightTile > currentLayer || cornerTopRight > currentLayer && cornerBottomRight > currentLayer) && leftTile == currentLayer && topTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Right];
+      else if (currentLayer < Layer.Ground0 && (bottomTile > currentLayer || cornerBottomLeft > currentLayer && cornerBottomRight > currentLayer) && leftTile == currentLayer && rightTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Bottom];
+      else if (currentLayer < Layer.Ground0 && (leftTile > currentLayer || cornerTopLeft > currentLayer && cornerBottomLeft > currentLayer) && topTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Left];
 
-      else if (mainLayer > Layer.Ground0 && (topTile < mainLayer || cornerTopLeft < mainLayer && cornerTopRight < mainLayer) && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Top];
-      else if (mainLayer > Layer.Ground0 && (rightTile < mainLayer || cornerTopRight < mainLayer && cornerBottomRight < mainLayer) && leftTile == mainLayer && topTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Right];
-      else if (mainLayer > Layer.Ground0 && (bottomTile < mainLayer || cornerBottomLeft < mainLayer && cornerBottomRight < mainLayer) && leftTile == mainLayer && rightTile == mainLayer && topTile == mainLayer) return tilesID[TilePosition.Bottom];
-      else if (mainLayer > Layer.Ground0 && (leftTile < mainLayer || cornerTopLeft < mainLayer && cornerBottomLeft < mainLayer) && topTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.Left];
+      else if (currentLayer > Layer.Ground0 && (topTile < currentLayer || cornerTopLeft < currentLayer && cornerTopRight < currentLayer) && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Top];
+      else if (currentLayer > Layer.Ground0 && (rightTile < currentLayer || cornerTopRight < currentLayer && cornerBottomRight < currentLayer) && leftTile == currentLayer && topTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Right];
+      else if (currentLayer > Layer.Ground0 && (bottomTile < currentLayer || cornerBottomLeft < currentLayer && cornerBottomRight < currentLayer) && leftTile == currentLayer && rightTile == currentLayer && topTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Bottom];
+      else if (currentLayer > Layer.Ground0 && (leftTile < currentLayer || cornerTopLeft < currentLayer && cornerBottomLeft < currentLayer) && topTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.Left];
 
-      else if (mainLayer < Layer.Ground0 && cornerTopLeft > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopLeft];
-      else if (mainLayer < Layer.Ground0 && cornerTopRight > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopRight];
-      else if (mainLayer < Layer.Ground0 && cornerBottomLeft > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomLeft];
-      else if (mainLayer < Layer.Ground0 && cornerBottomRight > mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomRight];
+      else if (currentLayer < Layer.Ground0 && cornerTopLeft > currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerTopLeft];
+      else if (currentLayer < Layer.Ground0 && cornerTopRight > currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerTopRight];
+      else if (currentLayer < Layer.Ground0 && cornerBottomLeft > currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerBottomLeft];
+      else if (currentLayer < Layer.Ground0 && cornerBottomRight > currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerBottomRight];
 
-      else if (mainLayer > Layer.Ground0 && cornerTopLeft < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopLeft];
-      else if (mainLayer > Layer.Ground0 && cornerTopRight < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerTopRight];
-      else if (mainLayer > Layer.Ground0 && cornerBottomLeft < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomLeft];
-      else if (mainLayer > Layer.Ground0 && cornerBottomRight < mainLayer && topTile == mainLayer && leftTile == mainLayer && rightTile == mainLayer && bottomTile == mainLayer) return tilesID[TilePosition.CornerBottomRight];
-      else return tilesID[TilePosition.Center];
+      else if (currentLayer > Layer.Ground0 && cornerTopLeft < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerTopLeft];
+      else if (currentLayer > Layer.Ground0 && cornerTopRight < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerTopRight];
+      else if (currentLayer > Layer.Ground0 && cornerBottomLeft < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerBottomLeft];
+      else if (currentLayer > Layer.Ground0 && cornerBottomRight < currentLayer && topTile == currentLayer && leftTile == currentLayer && rightTile == currentLayer && bottomTile == currentLayer) return GetTiles(currentLayer)[TilePosition.CornerBottomRight];
+
+      else if (topTile <= currentLayer && leftTile <= currentLayer && rightTile <= currentLayer && rightTile <= currentLayer) return GetTiles(currentLayer)[TilePosition.Center];
+
+      else return GetTiles(currentLayer + 1)[TilePosition.Center];
     }
   }
 }
