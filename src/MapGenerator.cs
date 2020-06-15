@@ -249,7 +249,7 @@ namespace pokemongenerator
               if (!searchTileAround(x, y, tiles[TileType.GroundPath], 8) && r.NextDouble() >= 0.90) SetTile(x, y, 2); // tall grass
               if (GetTileId(x, y + 1) == tiles[TileType.GroundPath][TilePosition.Top] && r.NextDouble() >= 0.92) SetTile(x, y, 44); // sign
               if (searchTileAround(x, y, tiles[TileType.ForestTree], 3) && r.NextDouble() >= 0.99) SetTile(x, y, 117); // strain
-              if (searchTileAround(x, y, tiles[TileType.ForestTree], 3) && r.NextDouble() >= 0.99 && x%2==0)
+              if (searchTileAround(x, y, tiles[TileType.ForestTree], 3) && r.NextDouble() >= 0.99 && x%2==0 && GetTileId(x+1, y) == 34)
               {
                 SetTile(x, y, 166);
                 SetTile(x+1, y, 167);
