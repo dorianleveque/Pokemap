@@ -8,7 +8,7 @@
     <h3>Pokemon map generator</h3>
     </br>
     </br>
-    <img src="assets/Pokemap.png" alt="drawing" width="600px;" style="filter: opacity(0.6) drop-shadow(0 0 0 blue);"/>
+    <img src="assets/pokemap.png" alt="drawing" width="600px;" style="filter: opacity(0.6) drop-shadow(0 0 0 blue);"/>
 </div>
 
 # 📃 Description of the project
@@ -73,6 +73,6 @@ dotnet run 200 50 12353
 dotnet run 200 50 johto
 ```
 
-⚠ Be careful:
+# ⚠ Be careful
 
 If nothing happens during the execution, you may have filled in too many houses or there may be only ocean. This can be solved by changing the input parameters.
