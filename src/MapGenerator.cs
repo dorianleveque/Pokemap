@@ -34,9 +34,9 @@ namespace pokemongenerator
         step.run();
       });
       Map.save();
-      Map.savePicture();
+      /*Map.savePicture();
       Map.processPicture();
-      Map.convertPicture();
+      Map.convertPicture();*/
     }
   }
 
