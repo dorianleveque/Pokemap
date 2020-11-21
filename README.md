@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/Pokemap-icon.png" alt="drawing" width="200px;" style="filter: opacity(0.6) drop-shadow(0 0 0 blue);"/>
+    <img src="assets/Pokemap-icon.png" alt="drawing" width="200px;"/>
     <h1>
         <b>
           Pokemap
