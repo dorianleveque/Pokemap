@@ -6,6 +6,7 @@ using System.Linq;
 using tiled;
 using AStarSharp;
 using System.Numerics;
+using System.Diagnostics;
 
 namespace pokemongenerator
 {
@@ -171,6 +172,7 @@ namespace pokemongenerator
       AddDecorations();
     }
 
+//*** cOULD CHANGE TO NOT ADD AS MANY ***
     private void AddTrees()
     {
       int height = generator.Map.lines.Count;
@@ -226,6 +228,7 @@ namespace pokemongenerator
       return true;
     }
 
+//DO WE NEED TO DECORATE
     private void AddDecorations()
     {
       Random r = new Random(generator.seed);
@@ -273,6 +276,8 @@ namespace pokemongenerator
       return false;
     }
 
+
+//COULD CHANGE RULES SLIGHTLY
     private void AddHouses(int number)
     {
       Random r = new Random(generator.seed);
@@ -306,14 +311,23 @@ namespace pokemongenerator
 
     }
 
+
+//COULD CHANGE RULES SLIGHTLY TO ALSO INCLUDE BEACH SAND
     private bool AddHouse(int x, int y, int categorie = 0)
     {
+      Random rng = new Random();
+      int grass_sand = rng.Next(0,2);
       int start_id = 0;
       int column = 0;
       int row = 0;
       int x_step = 0;
       int y_step = 0;
+      int groundtype = 34;
       //set each type of houses's parameters
+      if(grass_sand == 0){
+        groundtype = 94; //sand
+      }
+      Console.WriteLine(groundtype);
       switch (categorie)
       {
         case 0: start_id = 147; column = 4; row = 4; y_step = 4; x_step = 1; break;
@@ -327,16 +341,18 @@ namespace pokemongenerator
       try
       {
         // check if it's on grass
+        
         for (int i = 0; i < row + 4; i++)
         {
           for (int j = 0; j < column; j++)
           {
-            if (GetTileId(x + j, y - 2 + i) != 34)
+            if (GetTileId(x + j, y - 2 + i) != groundtype)
             {
               return false;
             }
           }
         }
+        
         // place les blocs de maison
         for (int i = 0; i < row; i++)
         {
@@ -352,6 +368,8 @@ namespace pokemongenerator
         return false;
       }
 
+
+
       var step = new Vector2();
       step.X = x + x_step;
       step.Y = y + y_step + 1;
@@ -361,7 +379,7 @@ namespace pokemongenerator
       return true; // if it's impossible to put house
     }
 
-
+//MAYBE CHANGE NOT SURE ABOUT THIS ONE
     private void AddCenters()
     {
 
@@ -402,6 +420,8 @@ namespace pokemongenerator
         });
       });
     }
+
+    //MAYBE CHANGE PATH RULES
     private void AddPath()
     {
       // Create map for A* lib
@@ -579,7 +599,7 @@ namespace pokemongenerator
       });
     }
 
-
+//keep these next two
 
     private void SetTile(int x, int y, int id)
     {
@@ -601,6 +621,8 @@ namespace pokemongenerator
     /** 
     * Get the layer type for each positions on the map
     */
+
+    //keep
     private Layer GetLayer(float x, float y)
     {
       switch (n.GetNoise(x, y))
@@ -629,6 +651,7 @@ namespace pokemongenerator
     /**
     * Get the correct Layer Tile for the connection between each layer type
     */
+    //keep
     private int GetCorrectLayerTile(float x, float y)
     {
       Layer currentLayer = GetLayer(x, y);
